@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Left section for the logo -->
+            <div class="navbar-logo">
+                <a href="/"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Site Logo"></a>
+            </div>
+            
+            <!-- Right section for navigation links -->
+            <div class="navbar-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/about" class="nav-link">Brain Tumors</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="/contact" class="nav-link">Contact Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div style="display: flex; width: 100%; align-items: center; margin-top: 80px;">
+        <!-- Left Side: Form -->
+        <div class="container">
+            <!-- Header -->
+            <h1>Brain Tumor Detection</h1>
+            <!-- Description -->
+            <p>Upload an MRI image for analysis.</p>
+            <!-- Form -->
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <button type="submit">Upload MRI Image</button>
+            </form>
+
+            {% if prediction %}
+            <!-- Prediction Section -->
+            <h2>Prediction Result: {{ prediction }}</h2>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

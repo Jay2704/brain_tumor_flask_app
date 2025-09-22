@@ -1,0 +1,223 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('/static/bg3.jpg');/* Correct path to your background image */
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Makes the background fixed during scrolling */
+    background-position: center; /* Centers the image */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 400px; /* Adjusted width for better alignment */
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    padding: 50px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin: 0 auto; /* Center the container */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: space-between; /* Space between items */
+    height: 500px; /* Set a fixed height */
+}
+
+h1 {
+    font-size: 2rem;
+    color: #004080; /* Darker blue for the title */
+    margin: 0; /* Remove extra margin */
+}
+
+p {
+    color: #003366; /* Slightly dark blue for supporting text */
+    margin: 10px 0; /* Add spacing around the paragraph */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Add space between form elements */
+}
+
+input[type="file"] {
+    margin: 10px 0;
+}
+
+button {
+    padding: 10px 20px;
+    background: #007bff; /* Vibrant blue for the button */
+    color: white;
+    border: none;
+    border-radius: 5px; /* Rounded corners for buttons */
+    cursor: pointer;
+    transition: background 0.3s ease; /* Smooth hover effect */
+}
+
+button:hover {
+    background: #0056b3; /* Darker blue on hover */
+}
+
+.uploaded-image {
+    margin-top: 20px;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation Bar */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.87); /* Semi-transparent */
+    color: white;
+    padding: 10px 20px; /* Do not change this */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+
+/* Navbar Container */
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-logo img {
+    max-height: 50px; /* Make the logo larger */
+    max-width: 50px; /* Maintain aspect ratio */
+    object-fit: contain;
+}
+
+/* Links Section */
+.navbar-links {
+    display: flex;
+    gap: 20px; /* Add space between links */
+}
+
+.nav-link {
+    color: rgb(35, 32, 32);
+    text-decoration: none;
+    padding: 8px 16px;
+    transition: background 0.3s ease;
+    border-radius: 5px;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Light hover effect */
+}
+
+.nav-link:active {
+    background-color: rgba(255, 255, 255, 0.4); /* Slightly darker on click */
+}
+
+
+/* about page */
+.about-container {
+    padding: 50px 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    margin: 100px; /* Margin from top to separate from navbar */
+    width: 80%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 200px;
+}
+
+.about-container h1 {
+    text-align: center;
+    color: #004080;
+    margin-bottom: 20px;
+}
+
+.tumor-section {
+    margin-bottom: 20px;
+}
+
+.tumor-section h3 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.tumor-section p {
+    line-height: 1.6;
+    color: #333;
+}
+
+ul {
+    margin-left: 20px;
+    line-height: 1.6;
+    color: #333;
+}
+
+
+/* contact us page */
+
+.contact-container {
+    padding: 100px 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    margin: 100px auto; /* Center alignment */
+    width: 80%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.contact-container h1 {
+    color: #004080;
+    margin-bottom: 20px;
+}
+
+.contact-container p {
+    color: #333;
+    margin-bottom: 40px;
+}
+
+/* Team Section */
+.team {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* Space between team members */
+}
+
+.team-member {
+    text-align: center;
+}
+
+.member-image {
+    width: 250px; /* Adjust width for images */
+    height: 200px; /* Fixed height for images */
+    border-radius: 10%; /* Circular image */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.team-member h3 {
+    color: #004080;
+    margin-bottom: 5px;
+    margin-left: 150px;
+    margin-right: 150px;
+}
+
+.team-member a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.team-member a:hover {
+    text-decoration: underline;
+}

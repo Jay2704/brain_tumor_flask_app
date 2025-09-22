@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/about" class="nav-link">Brain Tumors</a>
+            <a href="#services" class="nav-link">Services</a>
+            <a href="/contact" class="nav-link">Contact Us</a>
+        </div>
+    </nav>
+
+    <!-- Contact Us Section -->
+    <div class="contact-container">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you! Feel free to reach out to any of us:</p>
+
+        <div class="team">
+            <!-- Member 1 -->
+            <div class="team-member">
+                <img src="{{ url_for('static', filename='jay.jpg') }}" alt="Member 1" class="member-image">
+                <h3>Jay Paun</h3>
+                <p><a href="mailto:mp11252@umbc.edu">mp11252@umbc.edu</a></p>
+            </div>
+
+            <!-- Member 2 -->
+            <div class="team-member">
+                <img src="{{ url_for('static', filename='varun.jpg') }}" alt="Member 2" class="member-image">
+                <h3>Varun Garre</h3>
+                <p><a href="mailto:oc02296@umbc.edu">oc02296@umbc.edu</a></p>
+            </div>
+
+            <!-- Member 3 -->
+            <div class="team-member">
+                <img src="{{ url_for('static', filename='lak.jpg') }}" alt="Member 3" class="member-image">
+                <h3>Lakshman Teja Gudivada</h3>
+                <p><a href="mailto:l125@umbc.edu">l125@umbc.edu</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
