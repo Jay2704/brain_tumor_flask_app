@@ -1,6 +1,19 @@
 # Brain Tumor Detection Flask Application
 
-This is a Flask application for detecting brain tumors using MRI images. The project uses a pre-trained CNN model (`.h5` file) for predictions.
+This web application lets you upload a brain MRI image and receive an instant prediction of the tumor type using a pre-trained deep learning model built with TensorFlow/Keras. It runs a simple Flask server and provides a lightweight UI for image upload and viewing the result.
+
+What it does (at a glance):
+- Accepts an MRI image upload (JPG/PNG/JPEG)
+- Preprocesses the image to 224×224 RGB and normalizes pixel values
+- Runs inference with a CNN model (`.h5`)
+- Returns one of four classes: `glioma`, `meningioma`, `no tumor`, `pituitary`
+
+Use cases:
+- Quick local demos of medical imaging classification workflows
+- Baseline for students learning Flask + TensorFlow deployment
+- Starting point for customizing with your own models/datasets
+
+Note: This app is intended for educational and research demonstration only and is not a medical device.
 
 ---
 
@@ -32,11 +45,19 @@ pip install -r requirements.txt
 ```
 
 ### 4. Download the Model File
-Download the `.h5` model file from [[[[this Google Drive link](https://drive.google.com/dri](https://drive.google.com/drive/folders/12cdcVJYoenwH2WIF_IuYXjKRrFiedDnn?dmr=1&ec=wgc-drive-hero-goto). Once downloaded, move the file to the `models/` directory in your project:
+Download the `.h5` model from this Google Drive folder: `https://drive.google.com/drive/folders/12cdcVJYoenwH2WIF_IuYXjKRrFiedDnn`
+
+After downloading, create a `models/` directory (if it does not exist) and place the file there. The application expects the file at:
+
+```
+models/Brain_Tumors_vgg_final.h5
+```
+
+Example project layout:
 ```
 CMSC_668_brain_tumor_detection/
 ├── models/
-│   └── model.h5
+│   └── Brain_Tumors_vgg_final.h5
 ```
 
 ### 5. Your directory will look like
@@ -77,10 +98,34 @@ http://127.0.0.1:5001/
 
 ---
 
+## How it Works
+1. Upload an MRI image via the homepage form.
+2. The server saves the image to `static/uploads/`.
+3. The image is converted to RGB, resized to 224×224, and normalized to [0, 1].
+4. The TensorFlow model at `models/Brain_Tumors_vgg_final.h5` runs inference.
+5. The highest-probability class is returned and displayed on the page.
+
+Model input shape: `(1, 224, 224, 3)`
+
+Predicted classes: `glioma`, `meningioma`, `no tumor`, `pituitary`
+
+Routes:
+- `/` (GET): Home page and upload form
+- `/upload` (POST): Handles image upload and prediction
+- `/about` (GET): Project background page
+- `/contact` (GET): Contact page
+
+---
+
 ## Troubleshooting
 - Ensure all dependencies are installed correctly.
 - Verify the `model.h5` file is in the `models/` folder.
 - If the application doesn't run, check for errors in the terminal and ensure Python is installed correctly.
+
+Additional tips:
+- If you see a model loading error, confirm the exact filename is `Brain_Tumors_vgg_final.h5` and the directory is `models/` (relative to `app.py`).
+- If the port is in use, edit the `app.run(port=5001, debug=True)` line in `app.py` to another port.
+- On Apple Silicon, ensure a compatible TensorFlow build per the official docs if you encounter binary compatibility errors.
 
 ---
 
@@ -93,5 +138,9 @@ This project is for educational purposes only. For any other usage, please conta
 - Flask Framework
 - TensorFlow/Keras
 - Jay and Team
-```
+---
+
+## Notes for Customization
+- You can replace `models/Brain_Tumors_vgg_final.h5` with your own Keras `.h5` model. Make sure it accepts 224×224 RGB input or update the preprocessing in `app.py` accordingly.
+- To display the uploaded image alongside the prediction, use the commented code in `app.py` as a starting point and pass the image URL to the template.
 
