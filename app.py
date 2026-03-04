@@ -29,8 +29,60 @@ try:
 except Exception:
     model = None
 
-# Class labels for predictions (modify based on your model)
-class_labels = ['glioma', 'meningioma', 'no tumor', 'pituitary']
+# Output keys for vision_predict (model output order: glioma, meningioma, no tumor, pituitary)
+PROB_KEYS = ['glioma', 'meningioma', 'no_tumor', 'pituitary']
+
+
+def vision_predict(image_path):
+    """
+    Run inference on an image. Returns { label: str, confidence: float, probs: dict }.
+    probs keys: glioma, meningioma, no_tumor, pituitary.
+    """
+    processed = preprocess_image(image_path)
+    preds = model.predict(processed, verbose=0)[0]
+    probs = {k: float(v) for k, v in zip(PROB_KEYS, preds)}
+    idx = int(np.argmax(preds))
+    label = PROB_KEYS[idx]
+    confidence = float(preds[idx])
+    return {"label": label, "confidence": confidence, "probs": probs}
+
+
+def qa_check_image(image_path):
+    """
+    Imaging QA: check image quality before inference.
+    Returns { safe_to_infer: bool, quality_score: float, warnings: list[str] }.
+    """
+    warnings = []
+    try:
+        img = Image.open(image_path).convert('RGB')
+    except Exception as e:
+        return {
+            "safe_to_infer": False,
+            "quality_score": 0.0,
+            "warnings": [f"Could not open image: {e}"],
+        }
+    w, h = img.size
+    arr = np.array(img) / 255.0
+    mean_val = float(np.mean(arr))
+    std_val = float(np.std(arr))
+
+    if min(w, h) < 150:
+        warnings.append(f"Image too small: {w}x{h} (min 150 required)")
+    if mean_val < 0.15:
+        warnings.append("Image too dark")
+    if mean_val > 0.90:
+        warnings.append("Image too bright")
+    if std_val < 0.05:
+        warnings.append("Low contrast")
+
+    safe_to_infer = min(w, h) >= 150
+    quality_score = float(np.clip(std_val, 0.0, 1.0))
+
+    return {
+        "safe_to_infer": safe_to_infer,
+        "quality_score": quality_score,
+        "warnings": warnings,
+    }
 
 
 def preprocess_image(image_path):
@@ -125,10 +177,8 @@ def upload_image():
         )
 
     try:
-        processed_image = preprocess_image(image_path)
-        predictions = model.predict(processed_image)
-        predicted_class = class_labels[np.argmax(predictions)]
-        return render_template('index.html', prediction=predicted_class)
+        result = vision_predict(image_path)
+        return render_template('index.html', prediction=result['label'])
     except Exception as e:
         return render_template(
             'index.html',

@@ -10,7 +10,7 @@ from io import BytesIO
 # Import the Flask app
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app import app, preprocess_image, class_labels
+from app import app, preprocess_image, PROB_KEYS, vision_predict
 
 
 class TestBrainTumorApp:
@@ -113,14 +113,14 @@ class TestBrainTumorApp:
                              content_type='multipart/form-data')
         
         assert response.status_code == 200
-        assert b'Prediction Result: no tumor' in response.data
+        assert b'Prediction Result: no_tumor' in response.data
     
     def test_upload_route_all_predictions(self, client, sample_image):
         """Test upload route with different prediction results"""
         test_cases = [
             (np.array([[0.8, 0.1, 0.05, 0.05]]), 'glioma'),
             (np.array([[0.1, 0.8, 0.05, 0.05]]), 'meningioma'),
-            (np.array([[0.1, 0.1, 0.7, 0.1]]), 'no tumor'),
+            (np.array([[0.1, 0.1, 0.7, 0.1]]), 'no_tumor'),
             (np.array([[0.1, 0.1, 0.1, 0.7]]), 'pituitary')
         ]
         
@@ -153,11 +153,31 @@ class TestBrainTumorApp:
         finally:
             os.unlink(tmp_file_path)
     
-    def test_class_labels_constant(self):
-        """Test that class_labels contains expected values"""
-        expected_labels = ['glioma', 'meningioma', 'no tumor', 'pituitary']
-        assert class_labels == expected_labels
-        assert len(class_labels) == 4
+    def test_prob_keys_constant(self):
+        """Test that PROB_KEYS contains expected values"""
+        expected_keys = ['glioma', 'meningioma', 'no_tumor', 'pituitary']
+        assert PROB_KEYS == expected_keys
+        assert len(PROB_KEYS) == 4
+
+    @patch('app.model', MagicMock(predict=lambda x: np.array([[0.1, 0.2, 0.6, 0.1]])))
+    def test_vision_predict_return_format(self, sample_image):
+        """Test vision_predict returns correct structure with label, confidence, probs"""
+        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+            sample_image.seek(0)
+            tmp.write(sample_image.read())
+            tmp_path = tmp.name
+        try:
+            result = vision_predict(tmp_path)
+            assert 'label' in result
+            assert 'confidence' in result
+            assert 'probs' in result
+            assert result['label'] == 'no_tumor'
+            assert result['confidence'] == 0.6
+            assert result['probs'] == {
+                'glioma': 0.1, 'meningioma': 0.2, 'no_tumor': 0.6, 'pituitary': 0.1
+            }
+        finally:
+            os.unlink(tmp_path)
     
     def test_template_with_prediction(self, client):
         """Test template rendering with prediction variable"""
@@ -229,7 +249,7 @@ class TestBrainTumorApp:
                                      content_type='multipart/form-data')
             
             assert response.status_code == 200
-            assert b'Prediction Result: no tumor' in response.data
+            assert b'Prediction Result: no_tumor' in response.data
 
 
 class TestImageProcessing:
