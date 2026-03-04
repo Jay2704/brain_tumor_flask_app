@@ -36,10 +36,14 @@
             <p>Upload an MRI image for analysis.</p>
             <!-- Form -->
             <form action="/upload" method="POST" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*" required>
+                <input type="file" name="image" accept=".png,.jpg,.jpeg" required>
                 <button type="submit">Upload MRI Image</button>
             </form>
 
+            {% if error %}
+            <!-- Error Section -->
+            <p class="error-message">{{ error }}</p>
+            {% endif %}
             {% if prediction %}
             <!-- Prediction Section -->
             <h2>Prediction Result: {{ prediction }}</h2>

@@ -121,7 +121,7 @@ class TestTemplateContent:
         # Check file input attributes
         assert 'type="file"' in html
         assert 'name="image"' in html
-        assert 'accept="image/*"' in html
+        assert '.png' in html and '.jpg' in html and 'accept=' in html
         assert 'required' in html
     
     def test_submit_button(self, client):

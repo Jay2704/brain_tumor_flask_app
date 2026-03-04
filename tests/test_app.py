@@ -62,7 +62,7 @@ class TestBrainTumorApp:
         # Check form elements
         assert 'input type="file"' in html
         assert 'name="image"' in html
-        assert 'accept="image/*"' in html
+        assert '.png' in html and '.jpg' in html and 'accept=' in html
         assert 'required' in html
         assert 'button type="submit"' in html
         assert 'Upload MRI Image' in html
@@ -77,22 +77,37 @@ class TestBrainTumorApp:
         response = client.get('/contact')
         assert response.status_code == 200
     
+    def test_healthz_route(self, client):
+        """Test the healthz route returns JSON with expected structure"""
+        response = client.get('/healthz')
+        data = response.get_json()
+        assert 'ok' in data
+        assert 'model_loaded' in data
+        assert 'model_path' in data
+        assert isinstance(data['model_path'], str)
+        # Status depends on whether model loaded (200 if ok, 500 if not)
+        if data['model_loaded']:
+            assert response.status_code == 200
+            assert data['ok'] is True
+        else:
+            assert response.status_code == 500
+            assert data['ok'] is False
+    
     def test_upload_route_no_file(self, client):
         """Test upload route with no file"""
         response = client.post('/upload')
-        assert response.status_code == 302  # Redirect to home
+        assert response.status_code == 200
+        assert b'No file selected' in response.data
     
     def test_upload_route_empty_filename(self, client):
         """Test upload route with empty filename"""
         response = client.post('/upload', data={'image': (BytesIO(b''), '')})
-        assert response.status_code == 302  # Redirect to home
+        assert response.status_code == 200
+        assert b'No file selected' in response.data
     
-    @patch('app.model.predict')
-    def test_upload_route_successful_upload(self, mock_predict, client, sample_image):
+    @patch('app.model', MagicMock(predict=lambda x: np.array([[0.1, 0.2, 0.6, 0.1]])))
+    def test_upload_route_successful_upload(self, client, sample_image):
         """Test successful image upload and prediction"""
-        # Mock the model prediction
-        mock_predict.return_value = np.array([[0.1, 0.2, 0.6, 0.1]])  # 'no tumor' has highest probability
-        
         response = client.post('/upload', 
                              data={'image': (sample_image, 'test_image.jpg')},
                              content_type='multipart/form-data')
@@ -100,7 +115,6 @@ class TestBrainTumorApp:
         assert response.status_code == 200
         assert b'Prediction Result: no tumor' in response.data
     
-    @patch('app.model.predict')
     def test_upload_route_all_predictions(self, client, sample_image):
         """Test upload route with different prediction results"""
         test_cases = [
@@ -111,7 +125,9 @@ class TestBrainTumorApp:
         ]
         
         for prediction_array, expected_class in test_cases:
-            with patch('app.model.predict', return_value=prediction_array):
+            mock_model = MagicMock()
+            mock_model.predict.return_value = prediction_array
+            with patch('app.model', mock_model):
                 response = client.post('/upload', 
                                      data={'image': (sample_image, 'test_image.jpg')},
                                      content_type='multipart/form-data')
@@ -178,7 +194,7 @@ class TestBrainTumorApp:
         # Check file input attributes
         assert 'type="file"' in html
         assert 'name="image"' in html
-        assert 'accept="image/*"' in html
+        assert '.png' in html and '.jpg' in html and 'accept=' in html
         assert 'required' in html
     
     def test_navigation_links(self, client):
@@ -192,10 +208,10 @@ class TestBrainTumorApp:
         assert 'href="/contact"' in html
         assert 'href="#services"' in html
     
-    @patch('app.model.predict')
-    def test_upload_with_different_image_formats(self, mock_predict, client):
+    def test_upload_with_different_image_formats(self, client):
         """Test upload with different image formats"""
-        mock_predict.return_value = np.array([[0.1, 0.1, 0.7, 0.1]])
+        mock_model = MagicMock()
+        mock_model.predict.return_value = np.array([[0.1, 0.1, 0.7, 0.1]])
         
         # Test with different image formats
         formats = ['jpg', 'jpeg', 'png']
@@ -207,9 +223,10 @@ class TestBrainTumorApp:
             img.save(img_bytes, format=fmt.upper())
             img_bytes.seek(0)
             
-            response = client.post('/upload', 
-                                 data={'image': (img_bytes, f'test_image.{fmt}')},
-                                 content_type='multipart/form-data')
+            with patch('app.model', mock_model):
+                response = client.post('/upload', 
+                                     data={'image': (img_bytes, f'test_image.{fmt}')},
+                                     content_type='multipart/form-data')
             
             assert response.status_code == 200
             assert b'Prediction Result: no tumor' in response.data
