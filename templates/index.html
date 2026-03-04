@@ -47,6 +47,15 @@
             {% if prediction %}
             <!-- Prediction Section -->
             <h2>Prediction Result: {{ prediction }}</h2>
+            {% if confidence is not none %}
+            <p>Confidence: {{ "%.2f"|format(confidence * 100) }}%</p>
+            {% endif %}
+            {% if quality_score is not none %}
+            <p>Quality score: {{ "%.2f"|format(quality_score) }}</p>
+            {% endif %}
+            {% if warnings %}
+            <p>Warnings: {{ warnings|join(", ") }}</p>
+            {% endif %}
             {% endif %}
         </div>
     </div>
