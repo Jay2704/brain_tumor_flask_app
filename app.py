@@ -3,47 +3,47 @@ from werkzeug.utils import secure_filename
 import logging
 import os
 import uuid
-from PIL import Image
-import numpy as np
 import tensorflow as tf
+
+from agent.orchestrator import run as orchestrate
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
-CORS_ROUTES = {'/api/analyze', '/healthz'}
+CORS_ROUTES = {"/api/analyze", "/api/v1/analyze", "/healthz"}
 
 
 @app.after_request
 def add_cors_headers(response):
     """Add CORS headers for API routes (React dev server)."""
     if request.path in CORS_ROUTES:
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     return response
 
 
 @app.before_request
 def handle_options_preflight():
     """Respond to OPTIONS preflight for CORS."""
-    if request.method == 'OPTIONS' and request.path in CORS_ROUTES:
-        return Response('', status=204)
+    if request.method == "OPTIONS" and request.path in CORS_ROUTES:
+        return Response("", status=204)
 
 
 def allowed_file(filename):
     """Check if the file has an allowed extension."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # Load the pre-trained model (graceful failure so server can start)
-model_path = './models/Brain_Tumors_vgg_final.h5'
+model_path = "./models/Brain_Tumors_vgg_final.h5"
 model = None
 try:
     model = tf.keras.models.load_model(model_path)
@@ -51,148 +51,10 @@ except Exception as e:
     model = None
     logging.exception("Model load failed for %s: %s", model_path, e)
 
-# Output keys for vision_predict (model output order: glioma, meningioma, no tumor, pituitary)
-PROB_KEYS = ['glioma', 'meningioma', 'no_tumor', 'pituitary']
+CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
 
-def vision_predict(image_path):
-    """
-    Run inference on an image. Returns { label: str, confidence: float, probs: dict }.
-    probs keys: glioma, meningioma, no_tumor, pituitary.
-    """
-    processed = preprocess_image(image_path)
-    preds = model.predict(processed, verbose=0)[0]
-    probs = {k: float(v) for k, v in zip(PROB_KEYS, preds)}
-    idx = int(np.argmax(preds))
-    label = PROB_KEYS[idx]
-    confidence = float(preds[idx])
-    return {"label": label, "confidence": confidence, "probs": probs}
-
-
-def qa_check_image(image_path):
-    """
-    Imaging QA: check image quality before inference.
-    Returns { safe_to_infer: bool, quality_score: float, warnings: list[str] }.
-    """
-    warnings = []
-    try:
-        img = Image.open(image_path).convert('RGB')
-    except Exception as e:
-        return {
-            "safe_to_infer": False,
-            "quality_score": 0.0,
-            "warnings": [f"Could not open image: {e}"],
-        }
-    w, h = img.size
-    arr = np.array(img) / 255.0
-    mean_val = float(np.mean(arr))
-    std_val = float(np.std(arr))
-
-    if min(w, h) < 150:
-        warnings.append(f"Image too small: {w}x{h} (min 150 required)")
-    if mean_val < 0.15:
-        warnings.append("Image too dark")
-    if mean_val > 0.90:
-        warnings.append("Image too bright")
-    if std_val < 0.05:
-        warnings.append("Low contrast")
-
-    safe_to_infer = min(w, h) >= 150
-    quality_score = float(np.clip(std_val, 0.0, 1.0))
-
-    return {
-        "safe_to_infer": safe_to_infer,
-        "quality_score": quality_score,
-        "warnings": warnings,
-    }
-
-
-def generate_report(qa, vision):
-    """
-    Generate a report from QA and vision results.
-    Returns { findings: str, impression: str, next_steps: list[str], limitations: str, urgency: str }.
-    """
-    limitations = "Educational demo only. Not medical advice."
-
-    if not qa.get("safe_to_infer", True):
-        return {
-            "findings": "; ".join(qa.get("warnings", []) or ["Image quality insufficient for analysis."]),
-            "impression": "Inconclusive due to image quality",
-            "next_steps": ["Obtain higher quality image.", "Consult a healthcare provider for clinical evaluation."],
-            "limitations": limitations,
-            "urgency": "low",
-        }
-
-    label = vision.get("label", "unknown")
-    confidence = vision.get("confidence", 0.0)
-
-    if confidence < 0.60:
-        return {
-            "findings": f"Model prediction: {label} (confidence {confidence:.2f}). Quality score: {qa.get('quality_score', 0):.2f}.",
-            "impression": "Uncertain classification",
-            "next_steps": ["Consider repeat imaging or expert review.", "Consult a healthcare provider."],
-            "limitations": limitations,
-            "urgency": "medium",
-        }
-
-    label_display = label.replace("_", " ")
-    impression = f"Predicted: {label_display}"
-    urgency = "low" if label == "no_tumor" else "medium"
-    next_steps = ["Consult a healthcare provider for clinical evaluation."]
-    if label != "no_tumor":
-        next_steps.insert(0, "Further imaging or specialist referral may be indicated.")
-
-    return {
-        "findings": f"Model prediction: {label_display} (confidence {confidence:.2f}). Quality score: {qa.get('quality_score', 0):.2f}.",
-        "impression": impression,
-        "next_steps": next_steps,
-        "limitations": limitations,
-        "urgency": urgency,
-    }
-
-
-def orchestrate(image_path):
-    """
-    Orchestrate QA, vision inference, and report generation.
-    Returns { request_id, qa, vision, report, artifacts }.
-    """
-    request_id = str(uuid.uuid4())
-    qa = qa_check_image(image_path)
-
-    if not qa.get("safe_to_infer", False):
-        vision = {}
-        report = generate_report(qa, vision)
-        return {
-            "request_id": request_id,
-            "qa": qa,
-            "vision": vision,
-            "report": report,
-            "artifacts": {},
-        }
-
-    vision = vision_predict(image_path)
-    report = generate_report(qa, vision)
-    return {
-        "request_id": request_id,
-        "qa": qa,
-        "vision": vision,
-        "report": report,
-        "artifacts": {},
-    }
-
-
-def preprocess_image(image_path):
-    """
-    Preprocess the uploaded image to make it compatible with the model.
-    """
-    img = Image.open(image_path).convert('RGB')  # Ensure 3 channels (RGB)
-    img = img.resize((224, 224))  # Resize to the model's expected input size
-    img_array = np.array(img) / 255.0  # Normalize pixel values to [0, 1]
-    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-    return img_array
-
-
-@app.route('/healthz', methods=['GET'])
+@app.route("/healthz", methods=["GET"])
 def healthz():
     """Health check endpoint. Returns 500 if model failed to load."""
     model_loaded = model is not None
@@ -206,82 +68,58 @@ def healthz():
     return jsonify(payload), status
 
 
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
-
-
-
-# @app.route('/upload', methods=['POST'])
-# def upload_image():
-#     if 'image' not in request.files:
-#         return redirect(url_for('home'))
-
-#     image = request.files['image']
-#     if image.filename == '':
-#         return redirect(url_for('home'))
-
-#     # Save the uploaded image to the upload folder
-#     image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
-#     image.save(image_path)
-
-#     # Preprocess the image and make a prediction
-#     processed_image = preprocess_image(image_path)
-#     predictions = model.predict(processed_image)
-#     predicted_class = class_labels[np.argmax(predictions)]
-
-#     # Render the result on the webpage
-#     return render_template(
-#         'index.html', 
-#         uploaded_image=url_for('static', filename=f'uploads/{image.filename}'),
-#         prediction=predicted_class
-#     )
+    return render_template("index.html")
 
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
     """Handle file too large (exceeds MAX_CONTENT_LENGTH)."""
-    return render_template('index.html', error='File too large. Maximum size is 5 MB.'), 413
+    return render_template("index.html", error="File too large. Maximum size is 5 MB."), 413
 
 
-@app.route('/upload', methods=['POST'])
+@app.route("/upload", methods=["POST"])
 def upload_image():
-    if 'image' not in request.files:
-        return render_template('index.html', error='No file selected.')
+    if "image" not in request.files:
+        return render_template("index.html", error="No file selected.")
 
-    image = request.files['image']
-    if image.filename == '':
-        return render_template('index.html', error='No file selected.')
+    image = request.files["image"]
+    if image.filename == "":
+        return render_template("index.html", error="No file selected.")
 
     if not allowed_file(image.filename):
         return render_template(
-            'index.html',
-            error='Invalid file type. Allowed formats: PNG, JPG, JPEG.'
+            "index.html",
+            error="Invalid file type. Allowed formats: PNG, JPG, JPEG.",
         )
 
     filename = secure_filename(image.filename)
-    if filename == '':
-        return render_template('index.html', error='Invalid filename.')
+    if filename == "":
+        return render_template("index.html", error="Invalid filename.")
 
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file_prefix = str(uuid.uuid4())
+    safe_name = f"{file_prefix}_{filename}"
+    image_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
     image.save(image_path)
 
     if model is None:
         return render_template(
-            'index.html',
-            error='Analysis is temporarily unavailable. Please ensure the model file (Brain_Tumors_vgg_final.h5) is in the models/ folder and restart the application.'
+            "index.html",
+            error="Analysis is temporarily unavailable. Please ensure the model file (Brain_Tumors_vgg_final.h5) is in the models/ folder and restart the application.",
         )
 
     try:
-        result = orchestrate(image_path)
-        qa = result['qa']
-        vision = result.get('vision') or {}
-        prediction = vision.get('label', 'Inconclusive')
-        confidence = vision.get('confidence')
-        warnings = qa.get('warnings', [])
-        quality_score = qa.get('quality_score')
+        uploaded_image_url = url_for("static", filename=f"uploads/{safe_name}")
+        result = orchestrate(image_path, model, CLASS_LABELS, uploaded_image_url)
+        qa = result["qa"]
+        vision = result.get("vision") or {}
+        prediction = vision.get("label", "Inconclusive")
+        confidence = vision.get("confidence")
+        warnings = qa.get("warnings", [])
+        quality_score = qa.get("quality_score")
         return render_template(
-            'index.html',
+            "index.html",
             prediction=prediction,
             confidence=confidence,
             warnings=warnings,
@@ -289,32 +127,31 @@ def upload_image():
         )
     except Exception as e:
         return render_template(
-            'index.html',
-            error=f'Could not process image. Please ensure it is a valid PNG, JPG, or JPEG file. ({str(e)})'
+            "index.html",
+            error=f"Could not process image. Please ensure it is a valid PNG, JPG, or JPEG file. ({str(e)})",
         )
 
 
-
-@app.route('/api/analyze', methods=['POST'])
-def api_analyze():
+@app.route("/api/v1/analyze", methods=["POST"])
+def api_v1_analyze():
     """Analyze uploaded MRI image. Returns JSON with qa, vision, report."""
-    if 'image' not in request.files:
+    if "image" not in request.files:
         return jsonify({"error": "No file selected."}), 400
 
-    image = request.files['image']
-    if image.filename == '':
+    image = request.files["image"]
+    if image.filename == "":
         return jsonify({"error": "No file selected."}), 400
 
     if not allowed_file(image.filename):
         return jsonify({"error": "Invalid file type. Allowed: PNG, JPG, JPEG."}), 400
 
     filename = secure_filename(image.filename)
-    if filename == '':
+    if filename == "":
         return jsonify({"error": "Invalid filename."}), 400
 
     file_prefix = str(uuid.uuid4())
     safe_name = f"{file_prefix}_{filename}"
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
+    image_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
     image.save(image_path)
 
     if model is None:
@@ -324,7 +161,8 @@ def api_analyze():
         }), 503
 
     try:
-        result = orchestrate(image_path)
+        uploaded_image_url = url_for("static", filename=f"uploads/{safe_name}")
+        result = orchestrate(image_path, model, CLASS_LABELS, uploaded_image_url)
         if not result["qa"].get("safe_to_infer", False):
             result["vision"] = None
         return jsonify(result), 200
@@ -332,14 +170,20 @@ def api_analyze():
         return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
 
 
-@app.route('/about')
+@app.route("/api/analyze", methods=["POST"])
+def api_analyze():
+    """Legacy analyze endpoint (redirects to same logic as v1)."""
+    return api_v1_analyze()
+
+
+@app.route("/about")
 def about():
-    return render_template('brain_tumor.html')
+    return render_template("brain_tumor.html")
 
 
-@app.route('/contact')
+@app.route("/contact")
 def contact():
-    return render_template('contact.html')
+    return render_template("contact.html")
 
 
 if __name__ == "__main__":

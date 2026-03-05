@@ -10,7 +10,9 @@ from io import BytesIO
 # Import the Flask app
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app import app, preprocess_image, PROB_KEYS, vision_predict
+from app import app, CLASS_LABELS
+from ml.preprocess import preprocess_image
+from agent.vision_agent_tf import run as vision_run
 
 
 class TestBrainTumorApp:
@@ -153,21 +155,22 @@ class TestBrainTumorApp:
         finally:
             os.unlink(tmp_file_path)
     
-    def test_prob_keys_constant(self):
-        """Test that PROB_KEYS contains expected values"""
+    def test_class_labels_constant(self):
+        """Test that CLASS_LABELS contains expected values"""
         expected_keys = ['glioma', 'meningioma', 'no_tumor', 'pituitary']
-        assert PROB_KEYS == expected_keys
-        assert len(PROB_KEYS) == 4
+        assert CLASS_LABELS == expected_keys
+        assert len(CLASS_LABELS) == 4
 
     @patch('app.model', MagicMock(predict=lambda x: np.array([[0.1, 0.2, 0.6, 0.1]])))
-    def test_vision_predict_return_format(self, sample_image):
-        """Test vision_predict returns correct structure with label, confidence, probs"""
+    def test_vision_agent_return_format(self, sample_image):
+        """Test vision_agent run returns correct structure with label, confidence, probs"""
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
             sample_image.seek(0)
             tmp.write(sample_image.read())
             tmp_path = tmp.name
         try:
-            result = vision_predict(tmp_path)
+            import app
+            result = vision_run(tmp_path, app.model, CLASS_LABELS)
             assert 'label' in result
             assert 'confidence' in result
             assert 'probs' in result
