@@ -12,6 +12,15 @@ Main test file containing:
 - **Image Processing Tests**: Tests for the `preprocess_image` function
 - **Model Integration Tests**: Tests for model prediction functionality
 
+### `test_api.py`
+API tests for `/api/v1/analyze` and `/healthz`:
+- **Success Response Shape**: Validates request_id, qa, vision, report, artifacts, latency_ms
+- **QA Fail Path**: Ensures vision is None when QA blocks inference
+- **Validation Errors**: Missing file, empty filename, bad extension return 400 with standardized error JSON
+- **Model Unavailable**: Returns 503 with MODEL_UNAVAILABLE
+- **Healthz**: Returns ok, model_loaded, model_path; 200 when healthy, 500 when model unavailable
+- Uses mocked model so tests do not require the .h5 file
+
 ### `test_template_content.py`
 Template-specific tests containing:
 - **HTML Structure Tests**: Tests for proper HTML structure and DOCTYPE
@@ -37,6 +46,7 @@ pytest
 ```bash
 pytest tests/test_app.py
 pytest tests/test_template_content.py
+pytest tests/test_api.py
 ```
 
 ### Run with Verbose Output
