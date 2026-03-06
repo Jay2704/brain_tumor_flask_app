@@ -42,6 +42,11 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def api_error(code: str, message: str, status: int = 400):
+    """Return standardized API error response."""
+    return jsonify({"error": {"code": code, "message": message}}), status
+
+
 # Load the pre-trained model (graceful failure so server can start)
 model_path = "./models/Brain_Tumors_vgg_final.h5"
 model = None
@@ -56,7 +61,7 @@ CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
 @app.route("/healthz", methods=["GET"])
 def healthz():
-    """Health check endpoint. Returns 500 if model failed to load."""
+    """Health check. Returns JSON {ok, model_loaded, model_path}. 200 when healthy, 500 when model unavailable."""
     model_loaded = model is not None
     ok = model_loaded
     payload = {
@@ -76,6 +81,8 @@ def home():
 @app.errorhandler(413)
 def request_entity_too_large(error):
     """Handle file too large (exceeds MAX_CONTENT_LENGTH)."""
+    if request.path.startswith("/api/"):
+        return api_error("FILE_TOO_LARGE", "File too large. Maximum size is 5 MB.", 413)
     return render_template("index.html", error="File too large. Maximum size is 5 MB."), 413
 
 
@@ -134,31 +141,36 @@ def upload_image():
 
 @app.route("/api/v1/analyze", methods=["POST"])
 def api_v1_analyze():
-    """Analyze uploaded MRI image. Returns JSON with qa, vision, report."""
+    """Analyze uploaded MRI image. Returns standardized JSON."""
     if "image" not in request.files:
-        return jsonify({"error": "No file selected."}), 400
+        return api_error("MISSING_FILE", "No file selected. Use multipart form field 'image'.", 400)
 
     image = request.files["image"]
     if image.filename == "":
-        return jsonify({"error": "No file selected."}), 400
+        return api_error("EMPTY_FILENAME", "No file selected.", 400)
 
     if not allowed_file(image.filename):
-        return jsonify({"error": "Invalid file type. Allowed: PNG, JPG, JPEG."}), 400
+        return api_error(
+            "UNSUPPORTED_EXTENSION",
+            "Invalid file type. Allowed: PNG, JPG, JPEG.",
+            400,
+        )
 
     filename = secure_filename(image.filename)
     if filename == "":
-        return jsonify({"error": "Invalid filename."}), 400
+        return api_error("INVALID_FILENAME", "Invalid filename.", 400)
+
+    if model is None:
+        return api_error(
+            "MODEL_UNAVAILABLE",
+            "The model file was not found or failed to load. Please ensure Brain_Tumors_vgg_final.h5 exists in the models/ folder and restart the application.",
+            503,
+        )
 
     file_prefix = str(uuid.uuid4())
     safe_name = f"{file_prefix}_{filename}"
     image_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
     image.save(image_path)
-
-    if model is None:
-        return jsonify({
-            "error": "Model not available.",
-            "detail": "The model file (Brain_Tumors_vgg_final.h5) was not found or failed to load. Please ensure it exists in the models/ folder and restart the application.",
-        }), 503
 
     try:
         uploaded_image_url = url_for("static", filename=f"uploads/{safe_name}")
@@ -167,7 +179,12 @@ def api_v1_analyze():
             result["vision"] = None
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
+        logging.exception("Analysis failed: %s", e)
+        return api_error(
+            "INTERNAL_SERVER_ERROR",
+            f"Analysis failed: {str(e)}",
+            500,
+        )
 
 
 @app.route("/api/analyze", methods=["POST"])
