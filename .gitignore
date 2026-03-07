@@ -4,6 +4,8 @@ models/*.h5
 
 # Python
 __pycache__/
+agent/__pycache__/
+ml/__pycache__/
 venv/
 
 # Uploads
