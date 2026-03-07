@@ -1,3 +1,13 @@
 # Model files (heavy, download separately)
 model/*.h5
 models/*.h5
+
+# Python
+__pycache__/
+venv/
+
+# Uploads
+static/uploads/*
+
+# OS
+.DS_Store
