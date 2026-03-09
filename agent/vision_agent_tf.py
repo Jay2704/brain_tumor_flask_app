@@ -3,7 +3,7 @@ import numpy as np
 
 from ml.preprocess import preprocess_image
 
-# Model output order: glioma, meningioma, no tumor, pituitary
+# Model output order: glioma, meningioma, no_tumor, pituitary (synced with image_data folder names)
 CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
 
