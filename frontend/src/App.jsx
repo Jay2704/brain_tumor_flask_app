@@ -391,6 +391,39 @@ function App() {
               </div>
             )}
 
+            {/* Model Info */}
+            <div className="card card-model-info">
+              <h3>🧠 Model Information</h3>
+              <div className="model-info-grid">
+                <div className="model-info-item">
+                  <span className="model-info-label">Architecture</span>
+                  <span className="model-info-value">VGG-based CNN</span>
+                </div>
+                <div className="model-info-item">
+                  <span className="model-info-label">Type</span>
+                  <span className="model-info-value">Convolutional Neural Network</span>
+                </div>
+                <div className="model-info-item">
+                  <span className="model-info-label">Input Size</span>
+                  <span className="model-info-value">224×224 RGB</span>
+                </div>
+                <div className="model-info-item">
+                  <span className="model-info-label">Classes</span>
+                  <span className="model-info-value">Glioma, Meningioma, Pituitary, No Tumor</span>
+                </div>
+                <div className="model-info-item">
+                  <span className="model-info-label">Validation Accuracy</span>
+                  <span className="model-info-value">~94%</span>
+                </div>
+                {result.latency_ms != null && (
+                  <div className="model-info-item">
+                    <span className="model-info-label">Inference Time</span>
+                    <span className="model-info-value">{result.latency_ms} ms</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <button type="button" className="btn-new-scan" onClick={handleBack}>
               New Scan
             </button>
