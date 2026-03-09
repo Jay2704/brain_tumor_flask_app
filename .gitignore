@@ -11,5 +11,10 @@ venv/
 # Uploads
 static/uploads/*
 
+# Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
 # OS
 .DS_Store

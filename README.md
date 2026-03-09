@@ -162,6 +162,20 @@ When QA blocks inference, `vision` is `null` but the response is still 200 with 
 
 ---
 
+## React Frontend (Optional)
+
+A minimal React frontend is in `frontend/`. To run it:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Ensure the Flask backend is running first (`python app.py`). The frontend proxies API calls to `http://127.0.0.1:5001`.
+
+---
+
 ## Running Tests
 
 ```bash
