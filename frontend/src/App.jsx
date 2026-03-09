@@ -6,8 +6,19 @@
  */
 import { useState } from 'react'
 
-// Backend API URL - uses proxy in dev (vite.config.js) or direct URL
+// Backend API URL - uses proxy in dev (vite.config.js)
 const API_URL = '/api/v1/analyze'
+
+/**
+ * Convert backend labels (e.g. no_tumor, glioma) to display text (No Tumor, Glioma)
+ */
+function formatLabel(label) {
+  if (!label) return ''
+  return label
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
 
 function App() {
   const [file, setFile] = useState(null)
@@ -63,7 +74,6 @@ function App() {
       </header>
 
       <main>
-        {/* Upload form */}
         <form onSubmit={handleSubmit} className="upload-form">
           <input
             type="file"
@@ -76,94 +86,111 @@ function App() {
           </button>
         </form>
 
-        {/* Error state */}
         {error && (
           <div className="error-box">
             <strong>Error:</strong> {error}
           </div>
         )}
 
-        {/* Results */}
         {result && (
           <div className="results">
-            <h2>Analysis Result</h2>
-            {result.request_id && (
-              <p className="meta">Request ID: {result.request_id}</p>
-            )}
-            {result.latency_ms != null && (
-              <p className="meta">Latency: {result.latency_ms} ms</p>
-            )}
+            {/* Prediction Result - prominent summary card */}
+            <div className="card card-prediction">
+              <h2>Prediction Result</h2>
+              {result.vision ? (
+                <>
+                  <p className="prediction-label">Detected Type: {formatLabel(result.vision.label)}</p>
+                  <p className="prediction-confidence">
+                    Confidence: {Math.round((result.vision.confidence || 0) * 100)}%
+                  </p>
+                </>
+              ) : (
+                <p className="prediction-inconclusive">Result: Inconclusive</p>
+              )}
+            </div>
 
-            {/* QA Result */}
+            {/* QA Card */}
             {result.qa && (
-              <section className="result-section">
-                <h3>QA Result</h3>
+              <div className="card">
+                <h3>Image Quality</h3>
+                <p><strong>Safe to Infer:</strong> {result.qa.safe_to_infer ? 'Yes' : 'No'}</p>
+                <p><strong>Quality Score:</strong> {Math.round((result.qa.quality_score || 0) * 100)}%</p>
+                <p><strong>Warnings:</strong></p>
                 <ul>
-                  <li><strong>safe_to_infer:</strong> {String(result.qa.safe_to_infer)}</li>
-                  <li><strong>quality_score:</strong> {result.qa.quality_score}</li>
-                  <li>
-                    <strong>warnings:</strong>{' '}
-                    {result.qa.warnings?.length
-                      ? result.qa.warnings.join(', ')
-                      : 'None'}
-                  </li>
+                  {result.qa.warnings?.length
+                    ? result.qa.warnings.map((w, i) => <li key={i}>{w}</li>)
+                    : <li>No warnings</li>}
                 </ul>
-              </section>
+              </div>
             )}
 
-            {/* Vision Result */}
-            {result.vision != null && (
-              <section className="result-section">
-                <h3>Vision Result</h3>
-                <ul>
-                  <li><strong>label:</strong> {result.vision.label}</li>
-                  <li><strong>confidence:</strong> {result.vision.confidence}</li>
-                  <li>
-                    <strong>probs:</strong>
-                    <pre>{JSON.stringify(result.vision.probs, null, 2)}</pre>
-                  </li>
-                </ul>
-              </section>
-            )}
-            {result.vision === null && (
-              <section className="result-section">
-                <h3>Vision Result</h3>
-                <p className="muted">Inference skipped (QA blocked)</p>
-              </section>
+            {/* Probabilities - with progress bars */}
+            {result.vision?.probs && Object.keys(result.vision.probs).length > 0 && (
+              <div className="card">
+                <h3>Class Probabilities</h3>
+                <div className="prob-list">
+                  {Object.entries(result.vision.probs)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([label, prob]) => {
+                      const pct = Math.round(prob * 100)
+                      const isHighest = label === result.vision.label
+                      return (
+                        <div key={label} className={`prob-item ${isHighest ? 'prob-item-highlight' : ''}`}>
+                          <div className="prob-header">
+                            <span>{formatLabel(label)}</span>
+                            <span>{pct}%</span>
+                          </div>
+                          <div className="prob-bar">
+                            <div className="prob-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
+              </div>
             )}
 
-            {/* Report */}
+            {/* Report Card */}
             {result.report && (
-              <section className="result-section">
+              <div className="card">
                 <h3>Report</h3>
-                <ul>
-                  <li><strong>findings:</strong> {result.report.findings}</li>
-                  <li><strong>impression:</strong> {result.report.impression}</li>
-                  <li>
-                    <strong>next_steps:</strong>
-                    <ul>
-                      {result.report.next_steps?.map((step, i) => (
-                        <li key={i}>{step}</li>
-                      ))}
-                    </ul>
-                  </li>
-                  <li><strong>limitations:</strong> {result.report.limitations}</li>
-                  <li><strong>urgency:</strong> {result.report.urgency}</li>
-                </ul>
-              </section>
+                <div className="report-section">
+                  <h4>Findings</h4>
+                  <p>{result.report.findings}</p>
+                </div>
+                <div className="report-section">
+                  <h4>Impression</h4>
+                  <p>{result.report.impression}</p>
+                </div>
+                <div className="report-section">
+                  <h4>Recommended Next Steps</h4>
+                  <ul>
+                    {result.report.next_steps?.map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="report-section">
+                  <h4>Limitations</h4>
+                  <p>{result.report.limitations}</p>
+                </div>
+                <div className="report-section">
+                  <h4>Urgency</h4>
+                  <p>{formatLabel(result.report.urgency)}</p>
+                </div>
+              </div>
             )}
 
-            {/* Artifacts - uploaded image preview */}
+            {/* Image Preview */}
             {result.artifacts?.uploaded_image_url && (
-              <section className="result-section">
-                <h3>Artifacts</h3>
-                <p>Uploaded image preview:</p>
+              <div className="card">
+                <h3>Uploaded Image</h3>
                 <img
                   src={result.artifacts.uploaded_image_url}
                   alt="Uploaded MRI"
                   className="preview-img"
                 />
-              </section>
+              </div>
             )}
           </div>
         )}
