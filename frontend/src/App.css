@@ -420,6 +420,93 @@ body {
   margin-bottom: 0;
 }
 
+/* Future Work page */
+.future-work-page {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.future-work-page .btn-back {
+  margin-bottom: 1.5rem;
+}
+
+.future-work-page h1 {
+  font-size: 1.75rem;
+  color: var(--gray-900);
+  margin: 0 0 0.75rem 0;
+}
+
+.future-work-intro {
+  font-size: 1rem;
+  color: var(--gray-500);
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.future-work-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.future-work-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--purple);
+}
+
+.future-work-icon {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.future-work-card h2 {
+  font-size: 1.15rem;
+  color: var(--gray-900);
+  margin: 0 0 0.5rem 0;
+}
+
+.future-work-card .future-work-desc {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--gray-700);
+}
+
+.future-work-card .future-work-details {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--gray-700);
+}
+
+.future-work-card .future-work-details li {
+  margin-bottom: 0.5rem;
+}
+
+.future-work-card .future-work-details li:last-child {
+  margin-bottom: 0;
+}
+
+.future-work-cta {
+  text-align: center;
+  padding: 1rem;
+  background: var(--purple-bg);
+  border-radius: 10px;
+  border: 1px solid var(--purple-light);
+}
+
+.future-work-cta p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
 /* Auth pages (Login / Sign Up) */
 .auth-page {
   display: flex;
@@ -1387,6 +1474,21 @@ html[data-theme="dark"] body {
 .app.dark .tumor-type-card h2 { color: var(--text-primary); }
 .app.dark .tumor-type-card .tumor-type-desc,
 .app.dark .tumor-type-card .tumor-type-details { color: var(--text-secondary); }
+
+.app.dark .future-work-page h1 { color: var(--text-primary); }
+.app.dark .future-work-intro { color: var(--text-secondary); }
+.app.dark .future-work-card {
+  background: var(--bg-surface);
+  border-left-color: var(--purple);
+}
+.app.dark .future-work-card h2 { color: var(--text-primary); }
+.app.dark .future-work-card .future-work-desc,
+.app.dark .future-work-card .future-work-details { color: var(--text-secondary); }
+.app.dark .future-work-cta {
+  background: var(--purple-bg);
+  border-color: var(--purple);
+}
+.app.dark .future-work-cta p { color: var(--text-secondary); }
 
 /* Auth */
 .app.dark .auth-card {

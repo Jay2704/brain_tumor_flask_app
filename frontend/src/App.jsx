@@ -115,7 +115,7 @@ function App() {
   const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
-  const [view, setView] = useState('home') // 'home' | 'upload' | 'loading' | 'results' | 'tumor-types' | 'login' | 'signup'
+  const [view, setView] = useState('home') // 'home' | 'upload' | 'loading' | 'results' | 'tumor-types' | 'future-work' | 'login' | 'signup'
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('darkMode') === 'true'
@@ -282,6 +282,9 @@ function App() {
             </button>
             <button type="button" className={`nav-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
               Brain Tumor Types
+            </button>
+            <button type="button" className={`nav-link ${view === 'future-work' ? 'active' : ''}`} onClick={() => setView('future-work')}>
+              Future Work
             </button>
           </nav>
         </div>
@@ -634,6 +637,68 @@ function App() {
           </section>
         )}
 
+        {view === 'future-work' && (
+          <section className="future-work-page">
+            <button type="button" className="btn-back" onClick={() => setView('home')}>
+              ← Back
+            </button>
+            <h1>Future Work & Roadmap</h1>
+            <p className="future-work-intro">
+              We are expanding our AI diagnostic capabilities to support more imaging modalities and clinical use cases. Here is what we plan to bring next.
+            </p>
+
+            <div className="future-work-grid">
+              <article className="future-work-card">
+                <span className="future-work-icon">🫁</span>
+                <h2>Lung Disease Detection</h2>
+                <p className="future-work-desc">
+                  AI-powered analysis of chest X-rays and CT scans for pulmonary conditions including pneumonia, lung nodules, tuberculosis, and other respiratory abnormalities.
+                </p>
+                <ul className="future-work-details">
+                  <li>Chest X-ray screening for pneumonia and COVID-19-related findings</li>
+                  <li>CT lung nodule detection and size estimation</li>
+                  <li>Support for tuberculosis screening in high-burden regions</li>
+                  <li>Integration with existing radiology workflows</li>
+                </ul>
+              </article>
+
+              <article className="future-work-card">
+                <span className="future-work-icon">❤️</span>
+                <h2>Heart Disease Detection</h2>
+                <p className="future-work-desc">
+                  Cardiac imaging analysis for echocardiograms, chest X-rays, and cardiac MRI to support detection of heart failure, arrhythmias, and structural abnormalities.
+                </p>
+                <ul className="future-work-details">
+                  <li>Echocardiogram analysis for ejection fraction and wall motion</li>
+                  <li>ECG interpretation for arrhythmia screening</li>
+                  <li>Cardiac MRI for structural and functional assessment</li>
+                  <li>Cardiomegaly detection from chest X-rays</li>
+                </ul>
+              </article>
+
+              <article className="future-work-card">
+                <span className="future-work-icon">📋</span>
+                <h2>Additional Features</h2>
+                <p className="future-work-desc">
+                  Platform improvements and new capabilities to enhance usability, accuracy, and integration for healthcare providers.
+                </p>
+                <ul className="future-work-details">
+                  <li><strong>Batch processing</strong> — Analyze multiple scans in one session</li>
+                  <li><strong>DICOM support</strong> — Native support for standard medical imaging format</li>
+                  <li><strong>API access</strong> — REST API for third-party EHR and PACS integration</li>
+                  <li><strong>Mobile app</strong> — iOS and Android apps for on-the-go review</li>
+                  <li><strong>Multi-language reports</strong> — Localized findings and impressions</li>
+                  <li><strong>Comparison tracking</strong> — Compare scans over time for follow-up</li>
+                </ul>
+              </article>
+            </div>
+
+            <div className="future-work-cta">
+              <p>Have feedback or feature requests? Reach out to help shape our roadmap.</p>
+            </div>
+          </section>
+        )}
+
         {view === 'login' && (
           <section className="auth-page">
             <div className="auth-card">
@@ -800,6 +865,9 @@ function App() {
           </button>
           <button type="button" className={`nav-item ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
             Tumor Types
+          </button>
+          <button type="button" className={`nav-item ${view === 'future-work' ? 'active' : ''}`} onClick={() => setView('future-work')}>
+            Future Work
           </button>
           <button type="button" className={`nav-item ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
             Login
