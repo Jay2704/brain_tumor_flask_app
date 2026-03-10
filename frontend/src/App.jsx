@@ -23,8 +23,17 @@ function App() {
   const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
-  const [view, setView] = useState('upload') // 'upload' | 'loading' | 'results' | 'tumor-types'
+  const [view, setView] = useState('upload') // 'upload' | 'loading' | 'results' | 'tumor-types' | 'login' | 'signup'
   const fileInputRef = useRef(null)
+
+  // Auth form state (placeholder - no backend)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [signupName, setSignupName] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [signupConfirm, setSignupConfirm] = useState('')
+  const [authMessage, setAuthMessage] = useState(null)
 
   const TUMOR_TYPES = [
     {
@@ -161,8 +170,12 @@ function App() {
           </nav>
         </div>
         <div className="header-actions">
-          <button type="button" className="btn-login">Login</button>
-          <button type="button" className="btn-signup">Sign Up</button>
+          <button type="button" className="btn-login" onClick={() => { setView('login'); setAuthMessage(null); }}>
+            Login
+          </button>
+          <button type="button" className="btn-signup" onClick={() => { setView('signup'); setAuthMessage(null); }}>
+            Sign Up
+          </button>
         </div>
       </header>
 
@@ -459,6 +472,127 @@ function App() {
             </button>
           </section>
         )}
+
+        {view === 'login' && (
+          <section className="auth-page">
+            <div className="auth-card">
+              <button type="button" className="btn-back" onClick={() => setView('upload')}>
+                ← Back
+              </button>
+              <h1>Login</h1>
+              <p className="auth-subtitle">Sign in to access the Physician Portal</p>
+              <form
+                className="auth-form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setAuthMessage('Login is not yet connected to a backend. This is a placeholder.')
+                }}
+              >
+                <label>
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Password</span>
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                </label>
+                {authMessage && <p className="auth-message">{authMessage}</p>}
+                <button type="submit" className="btn-submit">Sign In</button>
+              </form>
+              <p className="auth-switch">
+                Don&apos;t have an account?{' '}
+                <button type="button" className="auth-link" onClick={() => { setView('signup'); setAuthMessage(null); }}>
+                  Sign Up
+                </button>
+              </p>
+            </div>
+          </section>
+        )}
+
+        {view === 'signup' && (
+          <section className="auth-page">
+            <div className="auth-card">
+              <button type="button" className="btn-back" onClick={() => setView('upload')}>
+                ← Back
+              </button>
+              <h1>Sign Up</h1>
+              <p className="auth-subtitle">Create an account for the Physician Portal</p>
+              <form
+                className="auth-form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (signupPassword !== signupConfirm) {
+                    setAuthMessage('Passwords do not match.')
+                    return
+                  }
+                  setAuthMessage('Sign up is not yet connected to a backend. This is a placeholder.')
+                }}
+              >
+                <label>
+                  <span>Full Name</span>
+                  <input
+                    type="text"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    placeholder="Dr. Jane Smith"
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Password</span>
+                  <input
+                    type="password"
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={8}
+                  />
+                </label>
+                <label>
+                  <span>Confirm Password</span>
+                  <input
+                    type="password"
+                    value={signupConfirm}
+                    onChange={(e) => setSignupConfirm(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                </label>
+                {authMessage && <p className="auth-message">{authMessage}</p>}
+                <button type="submit" className="btn-submit">Create Account</button>
+              </form>
+              <p className="auth-switch">
+                Already have an account?{' '}
+                <button type="button" className="auth-link" onClick={() => { setView('login'); setAuthMessage(null); }}>
+                  Login
+                </button>
+              </p>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="footer">
@@ -468,6 +602,9 @@ function App() {
           </button>
           <button type="button" className={`nav-item ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
             Tumor Types
+          </button>
+          <button type="button" className={`nav-item ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
+            Login
           </button>
           {view === 'results' && <span className="nav-item active">Results</span>}
         </div>
