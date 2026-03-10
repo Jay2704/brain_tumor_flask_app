@@ -508,6 +508,7 @@ function App() {
                     required
                   />
                 </label>
+                <button type="button" className="auth-forgot">Forgot password?</button>
                 {authMessage && <p className="auth-message">{authMessage}</p>}
                 <button type="submit" className="btn-submit">Sign In</button>
               </form>
