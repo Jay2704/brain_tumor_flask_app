@@ -11,6 +11,7 @@ Documentation for interview preparation and project overview.
 | **[ARCHITECTURE.md](./ARCHITECTURE.md)** | System architecture, component diagram, data flow, API contract |
 | **[TECH_STACK.md](./TECH_STACK.md)** | Technologies used (React, Flask, TensorFlow, etc.), project structure |
 | **[WORKFLOW.md](./WORKFLOW.md)** | End-to-end workflow, agent pipeline, error handling, data structures |
+| **[INTERVIEW_QA.md](./INTERVIEW_QA.md)** | Interview Q&A for SDE 1 & SDE 2 — architecture, backend, frontend, ML, system design, security, testing |
 
 ---
 
