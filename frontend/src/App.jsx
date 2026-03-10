@@ -2,9 +2,9 @@
  * Medical MRI Diagnosis AI Agent - Interactive UI
  *
  * Features: drag-and-drop upload, loading state with progress steps,
- * results dashboard. Connects to POST /api/v1/analyze.
+ * results dashboard, dark mode. Connects to POST /api/v1/analyze.
  */
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const API_URL = '/api/v1/analyze'
 
@@ -24,7 +24,21 @@ function App() {
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const [view, setView] = useState('home') // 'home' | 'upload' | 'loading' | 'results' | 'tumor-types' | 'login' | 'signup'
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem('darkMode') === 'true'
+    } catch {
+      return false
+    }
+  })
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+    try {
+      localStorage.setItem('darkMode', darkMode)
+    } catch {}
+  }, [darkMode])
 
   // Auth form state (placeholder - no backend)
   const [loginEmail, setLoginEmail] = useState('')
@@ -156,7 +170,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${view === 'home' ? 'app-home' : ''}`}>
+    <div className={`app ${view === 'home' ? 'app-home' : ''} ${darkMode ? 'dark' : ''}`}>
       <header className="header">
         <div className="header-left">
           <button type="button" className="header-logo" onClick={() => setView('home')}>
@@ -176,6 +190,15 @@ function App() {
           </nav>
         </div>
         <div className="header-actions">
+          <button
+            type="button"
+            className="btn-theme-toggle"
+            onClick={() => setDarkMode((d) => !d)}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
           <button type="button" className="btn-login" onClick={() => { setView('login'); setAuthMessage(null); }}>
             Login
           </button>

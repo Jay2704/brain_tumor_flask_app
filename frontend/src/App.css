@@ -117,6 +117,23 @@ body {
   gap: 0.5rem;
 }
 
+.btn-theme-toggle {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--gray-200);
+}
+
 .btn-login {
   padding: 0.5rem 1rem;
   background: transparent;
@@ -1097,3 +1114,245 @@ body {
   text-align: center;
   margin: 0;
 }
+
+/* ========== DARK MODE ========== */
+.app.dark {
+  --bg-page: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-elevated: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --purple: #a78bfa;
+  --purple-dark: #8b5cf6;
+  --purple-light: #c4b5fd;
+  --purple-bg: rgba(124, 58, 237, 0.2);
+}
+
+html[data-theme="dark"] body {
+  background: #0f172a !important;
+  background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.96) 100%) !important;
+}
+
+.app.dark {
+  background: transparent;
+}
+
+.app.dark.app-home {
+  background: transparent;
+}
+
+.app.dark .header {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+
+.app.dark .header-logo { color: var(--text-primary); }
+.app.dark .header-logo:hover { color: var(--purple-light); }
+.app.dark .nav-link { color: var(--text-secondary); }
+.app.dark .nav-link:hover,
+.app.dark .nav-link.active { color: var(--purple-light); }
+
+.app.dark .btn-theme-toggle {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+.app.dark .btn-theme-toggle:hover {
+  background: var(--border);
+}
+
+.app.dark .btn-login {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.app.dark .btn-login:hover {
+  background: var(--bg-elevated);
+  border-color: var(--text-muted);
+}
+
+.app.dark .btn-signup {
+  background: var(--purple);
+  color: #fff;
+}
+.app.dark .btn-signup:hover {
+  background: var(--purple-dark);
+}
+
+.app.dark .footer {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+.app.dark .footer-nav .nav-item { color: var(--text-muted); }
+.app.dark .footer-nav .nav-item:hover,
+.app.dark .footer-nav .nav-item.active { color: var(--purple-light); }
+.app.dark .disclaimer { color: var(--text-muted); }
+
+/* Home */
+.app.dark .home-section::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 58, 237, 0.2), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(139, 92, 246, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 80%, rgba(99, 102, 241, 0.1), transparent);
+}
+
+.app.dark .home-badge {
+  background: rgba(124, 58, 237, 0.25);
+  color: var(--purple-light);
+}
+
+.app.dark .home-title { color: var(--text-primary); }
+.app.dark .home-title-gradient {
+  background: linear-gradient(135deg, var(--purple-light) 0%, var(--purple) 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.app.dark .home-subtitle { color: var(--text-secondary); }
+
+.app.dark .home-stat,
+.app.dark .home-card,
+.app.dark .home-feature {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.app.dark .home-stat { border-color: var(--border); }
+.app.dark .home-card { border-left-color: var(--purple); }
+.app.dark .home-stat-value { color: var(--purple-light); }
+.app.dark .home-stat-label { color: var(--text-muted); }
+.app.dark .home-card h3 { color: var(--text-primary); }
+.app.dark .home-card ol,
+.app.dark .home-card ul,
+.app.dark .home-card li { color: var(--text-secondary); }
+.app.dark .home-feature { color: var(--text-secondary); }
+
+/* Upload */
+.app.dark .upload-section h1,
+.app.dark .subtitle { color: var(--text-primary); }
+.app.dark .subtitle { color: var(--text-secondary); }
+.app.dark .dropzone {
+  background: var(--purple-bg);
+  border-color: var(--purple);
+}
+.app.dark .dropzone:hover,
+.app.dark .dropzone-has-file {
+  border-color: var(--purple-light);
+  background: rgba(124, 58, 237, 0.15);
+}
+.app.dark .dropzone-text { color: var(--text-primary); }
+.app.dark .dropzone-hint { color: var(--text-muted); }
+.app.dark .dropzone-filename { color: var(--purple-light); }
+.app.dark .feature-card {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+/* Error */
+.app.dark .error-box {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+/* Loading */
+.app.dark .loading-section {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+.app.dark .loading-badge { background: var(--purple-bg); color: var(--purple-light); }
+.app.dark .loading-dot { background: var(--purple-light); }
+.app.dark .loading-section h2 { color: var(--text-primary); }
+.app.dark .loading-subtitle { color: var(--text-secondary); }
+.app.dark .loading-footer { border-color: var(--border); color: var(--text-muted); }
+.app.dark .progress-step { color: var(--text-muted); }
+.app.dark .progress-step.done { color: #86efac; }
+.app.dark .progress-step.active { color: var(--text-primary); }
+.app.dark .progress-step.active .step-icon { color: var(--purple-light); }
+.app.dark .step-status { color: #86efac; }
+
+/* Results */
+.app.dark .results-header h2 { color: var(--text-primary); }
+.app.dark .btn-back {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+.app.dark .btn-back:hover { background: var(--bg-elevated); }
+
+.app.dark .card {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.app.dark .card h3 { color: var(--text-primary); }
+.app.dark .card h4 { color: var(--text-muted); }
+.app.dark .card p,
+.app.dark .card li { color: var(--text-secondary); }
+.app.dark .card-prediction {
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%);
+  color: #fff;
+}
+.app.dark .card-prediction h3 { color: rgba(255,255,255,0.9); }
+.app.dark .card-model-info {
+  background: var(--purple-bg);
+  border-color: var(--purple);
+}
+.app.dark .model-info-label { color: var(--text-muted); }
+.app.dark .model-info-value { color: var(--text-primary); }
+.app.dark .prob-item-highlight {
+  background: var(--purple-bg);
+  border-left-color: var(--purple);
+}
+.app.dark .prob-header { color: var(--text-secondary); }
+.app.dark .prob-item-highlight .prob-header { color: var(--text-primary); }
+.app.dark .prob-bar { background: var(--bg-elevated); }
+.app.dark .prob-fill { background: var(--purple); }
+.app.dark .qa-block { background: var(--bg-elevated); }
+.app.dark .qa-block.qa-yes { background: rgba(34, 197, 94, 0.2); }
+.app.dark .qa-block.qa-no { background: rgba(239, 68, 68, 0.2); }
+.app.dark .qa-label { color: var(--text-muted); }
+.app.dark .qa-value { color: var(--text-primary); }
+.app.dark .qa-warnings { color: var(--text-secondary); }
+.app.dark .preview-img { border-color: var(--border); }
+.app.dark .report-section { color: var(--text-secondary); }
+.app.dark .report-section h4 { color: var(--text-muted); }
+
+/* Tumor types */
+.app.dark .tumor-types-page h1 { color: var(--text-primary); }
+.app.dark .tumor-types-intro { color: var(--text-secondary); }
+.app.dark .tumor-type-card {
+  background: var(--bg-surface);
+  border-left-color: var(--purple);
+}
+.app.dark .tumor-type-card h2 { color: var(--text-primary); }
+.app.dark .tumor-type-card .tumor-type-desc,
+.app.dark .tumor-type-card .tumor-type-details { color: var(--text-secondary); }
+
+/* Auth */
+.app.dark .auth-card {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+.app.dark .auth-card h1 { color: var(--text-primary); }
+.app.dark .auth-subtitle { color: var(--text-secondary); }
+.app.dark .auth-form label span { color: var(--text-secondary); }
+.app.dark .auth-form input {
+  background: var(--bg-page);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+.app.dark .auth-form input::placeholder { color: var(--text-muted); }
+.app.dark .auth-form input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px var(--purple-bg);
+}
+.app.dark .auth-message {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+.app.dark .auth-switch { color: var(--text-muted); }
+.app.dark .auth-link { color: var(--purple-light); }
+.app.dark .auth-forgot { color: var(--purple-light); }
