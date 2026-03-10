@@ -96,6 +96,11 @@ body {
   color: var(--purple);
 }
 
+.nav-link.active {
+  color: var(--purple);
+  font-weight: 600;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -131,6 +136,65 @@ body {
 
 .btn-signup:hover {
   background: var(--purple-dark);
+}
+
+/* Home / Main screen */
+.home-section {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.home-section h1 {
+  font-size: 2rem;
+  color: var(--gray-900);
+  margin: 0 0 1rem 0;
+}
+
+.home-subtitle {
+  font-size: 1.1rem;
+  color: var(--gray-500);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto 2rem auto;
+}
+
+.btn-cta {
+  padding: 1rem 2rem;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cta:hover {
+  background: var(--purple-dark);
+}
+
+.home-features {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.home-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.home-feature-icon {
+  font-size: 1.2rem;
 }
 
 /* Tumor Types page */

@@ -23,7 +23,7 @@ function App() {
   const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
-  const [view, setView] = useState('upload') // 'upload' | 'loading' | 'results' | 'tumor-types' | 'login' | 'signup'
+  const [view, setView] = useState('home') // 'home' | 'upload' | 'loading' | 'results' | 'tumor-types' | 'login' | 'signup'
   const fileInputRef = useRef(null)
 
   // Auth form state (placeholder - no backend)
@@ -159,12 +159,18 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-left">
-          <button type="button" className="header-logo" onClick={() => setView('upload')}>
+          <button type="button" className="header-logo" onClick={() => setView('home')}>
             <span className="logo-icon">🔬</span>
             <span>MRI Diagnosis AI</span>
           </button>
           <nav className="header-nav">
-            <button type="button" className="nav-link" onClick={() => setView('tumor-types')}>
+            <button type="button" className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+              Home
+            </button>
+            <button type="button" className={`nav-link ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => setView('upload')}>
+              Diagnosis AI
+            </button>
+            <button type="button" className={`nav-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
               Brain Tumor Types
             </button>
           </nav>
@@ -180,6 +186,32 @@ function App() {
       </header>
 
       <main className="main">
+        {view === 'home' && (
+          <section className="home-section">
+            <h1>Medical MRI Diagnosis AI</h1>
+            <p className="home-subtitle">
+              AI-powered brain MRI analysis for preliminary screening. Upload your scans for instant insights on glioma, meningioma, pituitary, and no-tumor classification.
+            </p>
+            <button type="button" className="btn-cta" onClick={() => setView('upload')}>
+              Upload MRI Image
+            </button>
+            <div className="home-features">
+              <div className="home-feature">
+                <span className="home-feature-icon">🛡️</span>
+                <span>HIPAA Compliant</span>
+              </div>
+              <div className="home-feature">
+                <span className="home-feature-icon">⏱</span>
+                <span>{'<'} 30s Analysis</span>
+              </div>
+              <div className="home-feature">
+                <span className="home-feature-icon">🧠</span>
+                <span>VGG-based CNN</span>
+              </div>
+            </div>
+          </section>
+        )}
+
         {view === 'upload' && (
           <section className="upload-section">
             <h1>Medical MRI Diagnosis AI Agent</h1>
@@ -445,8 +477,8 @@ function App() {
 
         {view === 'tumor-types' && (
           <section className="tumor-types-page">
-            <button type="button" className="btn-back" onClick={() => setView('upload')}>
-              ← Back to Upload
+            <button type="button" className="btn-back" onClick={() => setView('home')}>
+              ← Back
             </button>
             <h1>Types of Brain Tumors</h1>
             <p className="tumor-types-intro">
@@ -476,7 +508,7 @@ function App() {
         {view === 'login' && (
           <section className="auth-page">
             <div className="auth-card">
-              <button type="button" className="btn-back" onClick={() => setView('upload')}>
+              <button type="button" className="btn-back" onClick={() => setView('home')}>
                 ← Back
               </button>
               <h1>Login</h1>
@@ -525,7 +557,7 @@ function App() {
         {view === 'signup' && (
           <section className="auth-page">
             <div className="auth-card">
-              <button type="button" className="btn-back" onClick={() => setView('upload')}>
+              <button type="button" className="btn-back" onClick={() => setView('home')}>
                 ← Back
               </button>
               <h1>Sign Up</h1>
@@ -598,8 +630,11 @@ function App() {
 
       <footer className="footer">
         <div className="footer-nav">
-          <button type="button" className={`nav-item ${view === 'upload' ? 'active' : ''}`} onClick={() => setView('upload')}>
-            Upload
+          <button type="button" className={`nav-item ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+            Home
+          </button>
+          <button type="button" className={`nav-item ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => setView('upload')}>
+            Diagnosis AI
           </button>
           <button type="button" className={`nav-item ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
             Tumor Types
@@ -607,7 +642,6 @@ function App() {
           <button type="button" className={`nav-item ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
             Login
           </button>
-          {view === 'results' && <span className="nav-item active">Results</span>}
         </div>
         <p className="disclaimer">
           ⚠️ For educational purposes only. Not a substitute for professional medical advice.
