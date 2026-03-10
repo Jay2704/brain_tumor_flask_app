@@ -161,6 +161,9 @@ function App() {
   const [signupPassword, setSignupPassword] = useState('')
   const [signupConfirm, setSignupConfirm] = useState('')
   const [authMessage, setAuthMessage] = useState(null)
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [showSignupPassword, setShowSignupPassword] = useState(false)
+  const [showSignupConfirm, setShowSignupConfirm] = useState(false)
 
   const TUMOR_TYPES = [
     {
@@ -725,13 +728,24 @@ function App() {
                 </label>
                 <label>
                   <span>Password</span>
-                  <input
-                    type="password"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
+                  <div className="password-input-wrap">
+                    <input
+                      type={showLoginPassword ? 'text' : 'password'}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn-toggle-password"
+                      onClick={() => setShowLoginPassword((s) => !s)}
+                      title={showLoginPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
                 </label>
                 <button type="button" className="auth-forgot">Forgot password?</button>
                 {authMessage && <p className="auth-message">{authMessage}</p>}
@@ -788,24 +802,46 @@ function App() {
                 </label>
                 <label>
                   <span>Password</span>
-                  <input
-                    type="password"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    minLength={8}
-                  />
+                  <div className="password-input-wrap">
+                    <input
+                      type={showSignupPassword ? 'text' : 'password'}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      className="btn-toggle-password"
+                      onClick={() => setShowSignupPassword((s) => !s)}
+                      title={showSignupPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
                 </label>
                 <label>
                   <span>Confirm Password</span>
-                  <input
-                    type="password"
-                    value={signupConfirm}
-                    onChange={(e) => setSignupConfirm(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
+                  <div className="password-input-wrap">
+                    <input
+                      type={showSignupConfirm ? 'text' : 'password'}
+                      value={signupConfirm}
+                      onChange={(e) => setSignupConfirm(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn-toggle-password"
+                      onClick={() => setShowSignupConfirm((s) => !s)}
+                      title={showSignupConfirm ? 'Hide password' : 'Show password'}
+                      aria-label={showSignupConfirm ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupConfirm ? '🙈' : '👁️'}
+                    </button>
+                  </div>
                 </label>
                 {authMessage && <p className="auth-message">{authMessage}</p>}
                 <button type="submit" className="btn-submit">Create Account</button>
