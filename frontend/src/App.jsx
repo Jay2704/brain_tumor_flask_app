@@ -102,10 +102,6 @@ function exportReportToPdf(result, previewUrl) {
     if (result.report.urgency) addSection('Urgency', formatLabel(result.report.urgency))
   }
 
-  if (result.latency_ms != null) {
-    addSection('Model Info', `VGG-based CNN | Inference: ${result.latency_ms} ms`)
-  }
-
   addSection('Disclaimer', 'For educational purposes only. Not a substitute for professional medical advice. Results should be reviewed by a qualified radiologist.')
 
   const filename = `MRI_Report_${result.request_id || Date.now()}.pdf`
@@ -319,7 +315,7 @@ function App() {
                 Diagnosis AI
               </h1>
               <p className="home-subtitle">
-                Upload brain MRI scans for instant, AI-powered preliminary analysis. Our VGG-based CNN classifies scans into four categories—supporting radiologists with fast, consistent screening.
+                Upload brain MRI scans for instant, AI-powered preliminary analysis. Our AI classifies scans into four categories—supporting radiologists with fast, consistent screening.
               </p>
               <button type="button" className="btn-cta" onClick={() => setView('upload')}>
                 Upload MRI Image →
@@ -332,10 +328,6 @@ function App() {
                 <span className="home-stat-label">Tumor Types</span>
               </div>
               <div className="home-stat">
-                <span className="home-stat-value">~94%</span>
-                <span className="home-stat-label">Accuracy</span>
-              </div>
-              <div className="home-stat">
                 <span className="home-stat-value">{'<'}30s</span>
                 <span className="home-stat-label">Analysis Time</span>
               </div>
@@ -346,7 +338,7 @@ function App() {
                 <h3>How It Works</h3>
                 <ol>
                   <li>Upload your MRI scan (PNG/JPG)</li>
-                  <li>AI validates quality & runs inference</li>
+                  <li>AI validates quality and analyzes your scan</li>
                   <li>Get findings, impression & next steps</li>
                 </ol>
               </div>
@@ -369,10 +361,6 @@ function App() {
               <div className="home-feature">
                 <span className="home-feature-icon">⏱</span>
                 <span>{'<'} 30s Analysis</span>
-              </div>
-              <div className="home-feature">
-                <span className="home-feature-icon">🧠</span>
-                <span>VGG-based CNN</span>
               </div>
             </div>
           </section>
@@ -444,7 +432,7 @@ function App() {
               AI ANALYSIS IN PROGRESS
             </div>
             <h2>Analyzing Image...</h2>
-            <p className="loading-subtitle">Our neural network is processing the scan for anomalies.</p>
+            <p className="loading-subtitle">Processing your scan for anomalies.</p>
 
             <div className="loading-preview">
               {previewUrl && (
@@ -463,7 +451,7 @@ function App() {
                 <span className="step-icon">
                   {loadingStep >= 3 ? '✓' : loadingStep >= 2 ? '●' : '○'}
                 </span>
-                <span>AI model inference{loadingStep === 2 && '...'}</span>
+                <span>AI analysis{loadingStep === 2 && '...'}</span>
                 {loadingStep >= 3 && <span className="step-status">SUCCESS</span>}
               </div>
               <div className={`progress-step ${loadingStep >= 3 ? 'done' : ''}`}>
@@ -610,39 +598,6 @@ function App() {
               </div>
             )}
 
-            {/* Model Info */}
-            <div className="card card-model-info">
-              <h3>🧠 Model Information</h3>
-              <div className="model-info-grid">
-                <div className="model-info-item">
-                  <span className="model-info-label">Architecture</span>
-                  <span className="model-info-value">VGG-based CNN</span>
-                </div>
-                <div className="model-info-item">
-                  <span className="model-info-label">Type</span>
-                  <span className="model-info-value">Convolutional Neural Network</span>
-                </div>
-                <div className="model-info-item">
-                  <span className="model-info-label">Input Size</span>
-                  <span className="model-info-value">224×224 RGB</span>
-                </div>
-                <div className="model-info-item">
-                  <span className="model-info-label">Classes</span>
-                  <span className="model-info-value">Glioma, Meningioma, Pituitary, No Tumor</span>
-                </div>
-                <div className="model-info-item">
-                  <span className="model-info-label">Validation Accuracy</span>
-                  <span className="model-info-value">~94%</span>
-                </div>
-                {result.latency_ms != null && (
-                  <div className="model-info-item">
-                    <span className="model-info-label">Inference Time</span>
-                    <span className="model-info-value">{result.latency_ms} ms</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
             <button type="button" className="btn-new-scan" onClick={handleBack}>
               New Scan
             </button>
@@ -656,7 +611,7 @@ function App() {
             </button>
             <h1>Types of Brain Tumors</h1>
             <p className="tumor-types-intro">
-              This AI model classifies MRI scans into the following categories. Understanding these types helps interpret analysis results.
+              Our AI classifies MRI scans into the following categories. Understanding these types helps interpret analysis results.
             </p>
             <div className="tumor-types-grid">
               {TUMOR_TYPES.map((t) => (
@@ -853,7 +808,6 @@ function App() {
         <p className="disclaimer">
           ⚠️ For educational purposes only. Not a substitute for professional medical advice.
         </p>
-        <p className="footer-model-info">Model v1.0 • VGG CNN</p>
       </footer>
     </div>
   )

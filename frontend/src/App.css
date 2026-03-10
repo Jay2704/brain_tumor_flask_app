@@ -1117,42 +1117,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Model Info card */
-.card-model-info {
-  background: var(--purple-bg);
-  border: 1px solid var(--purple-light);
-}
-
-.model-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.5rem;
-}
-
-.model-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.model-info-label {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  font-weight: 500;
-}
-
-.model-info-value {
-  font-size: 0.9rem;
-  color: var(--gray-900);
-  font-weight: 600;
-}
-
-@media (max-width: 480px) {
-  .model-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* New scan button */
 .btn-new-scan {
   padding: 0.75rem 1.5rem;
@@ -1208,15 +1172,7 @@ body {
   font-size: 0.75rem;
   color: var(--gray-500);
   text-align: center;
-  margin: 0 0 0.35rem 0;
-}
-
-.footer-model-info {
-  font-size: 0.7rem;
-  color: var(--gray-500);
-  text-align: center;
   margin: 0;
-  opacity: 0.85;
 }
 
 /* ========== DARK MODE ========== */
@@ -1292,7 +1248,6 @@ html[data-theme="dark"] body {
 .app.dark .footer-nav .nav-item:hover,
 .app.dark .footer-nav .nav-item.active { color: var(--purple-light); }
 .app.dark .disclaimer { color: var(--text-muted); }
-.app.dark .footer-model-info { color: var(--text-muted); }
 .app.dark .conf-badge.conf-high { background: rgba(34, 197, 94, 0.25); color: #86efac; }
 .app.dark .conf-badge.conf-medium { background: rgba(234, 179, 8, 0.25); color: #fde047; }
 .app.dark .conf-badge.conf-low { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
@@ -1404,12 +1359,6 @@ html[data-theme="dark"] body {
   color: #fff;
 }
 .app.dark .card-prediction h3 { color: rgba(255,255,255,0.9); }
-.app.dark .card-model-info {
-  background: var(--purple-bg);
-  border-color: var(--purple);
-}
-.app.dark .model-info-label { color: var(--text-muted); }
-.app.dark .model-info-value { color: var(--text-primary); }
 .app.dark .prob-item-highlight {
   background: var(--purple-bg);
   border-left-color: var(--purple);
