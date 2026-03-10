@@ -826,6 +826,30 @@ body {
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.results-header h2 {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.25rem;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.btn-download-pdf {
+  padding: 0.5rem 1rem;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-download-pdf:hover {
+  background: var(--purple-dark);
 }
 
 .btn-back {
@@ -842,10 +866,12 @@ body {
   background: var(--gray-100);
 }
 
-.results-header h2 {
-  font-size: 1.25rem;
-  color: var(--gray-900);
-  margin: 0;
+.app.dark .btn-download-pdf {
+  background: var(--purple);
+  color: #fff;
+}
+.app.dark .btn-download-pdf:hover {
+  background: var(--purple-dark);
 }
 
 /* Cards */

@@ -2,9 +2,10 @@
  * Medical MRI Diagnosis AI Agent - Interactive UI
  *
  * Features: drag-and-drop upload, loading state with progress steps,
- * results dashboard, dark mode. Connects to POST /api/v1/analyze.
+ * results dashboard, dark mode, PDF export. Connects to POST /api/v1/analyze.
  */
 import { useState, useRef, useEffect } from 'react'
+import { jsPDF } from 'jspdf'
 
 const API_URL = '/api/v1/analyze'
 
@@ -14,6 +15,95 @@ function formatLabel(label) {
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
+}
+
+function exportReportToPdf(result, previewUrl) {
+  const doc = new jsPDF()
+  const margin = 20
+  let y = 20
+  const lineHeight = 7
+  const sectionGap = 10
+
+  const addText = (text, size = 10) => {
+    doc.setFontSize(size)
+    const lines = doc.splitTextToSize(text, 170)
+    lines.forEach((line) => {
+      if (y > 270) {
+        doc.addPage()
+        y = 20
+      }
+      doc.text(line, margin, y)
+      y += lineHeight
+    })
+  }
+
+  const addSection = (title, content) => {
+    if (y > 250) {
+      doc.addPage()
+      y = 20
+    }
+    doc.setFontSize(12)
+    doc.setFont(undefined, 'bold')
+    doc.text(title, margin, y)
+    y += lineHeight
+    doc.setFont(undefined, 'normal')
+    doc.setFontSize(10)
+    if (content && String(content).trim()) addText(String(content))
+    y += sectionGap
+  }
+
+  doc.setFontSize(18)
+  doc.setFont(undefined, 'bold')
+  doc.text('MRI AI Diagnostic Report', margin, y)
+  y += lineHeight + 2
+
+  doc.setFontSize(10)
+  doc.setFont(undefined, 'normal')
+  doc.text(`Report ID: ${result.request_id || 'N/A'}`, margin, y)
+  y += lineHeight
+  doc.text(`Generated: ${new Date().toLocaleString()}`, margin, y)
+  y += sectionGap + 5
+
+  if (result.vision) {
+    addSection('Primary Detection', `${formatLabel(result.vision.label)} (Confidence: ${Math.round((result.vision.confidence || 0) * 100)}%)`)
+  } else {
+    addSection('Primary Detection', 'Inconclusive')
+  }
+
+  if (result.qa) {
+    addSection('Quality Assurance', `Safe to Infer: ${result.qa.safe_to_infer ? 'Yes' : 'No'} | Quality Score: ${Math.round((result.qa.quality_score || 0) * 100)}%`)
+    if (result.qa.warnings?.length) {
+      addText(`Warnings: ${result.qa.warnings.join('; ')}`)
+      y += sectionGap
+    }
+  }
+
+  if (result.vision?.probs && Object.keys(result.vision.probs).length > 0) {
+    const probs = Object.entries(result.vision.probs)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, p]) => `${formatLabel(label)}: ${Math.round(p * 100)}%`)
+      .join(', ')
+    addSection('Probability Breakdown', probs)
+  }
+
+  if (result.report) {
+    if (result.report.findings) addSection('Findings', result.report.findings)
+    if (result.report.impression) addSection('Impression', result.report.impression)
+    if (result.report.next_steps?.length) {
+      addSection('Recommended Next Steps', result.report.next_steps.join('\n• '))
+    }
+    if (result.report.limitations) addSection('Limitations', result.report.limitations)
+    if (result.report.urgency) addSection('Urgency', formatLabel(result.report.urgency))
+  }
+
+  if (result.latency_ms != null) {
+    addSection('Model Info', `VGG-based CNN | Inference: ${result.latency_ms} ms`)
+  }
+
+  addSection('Disclaimer', 'For educational purposes only. Not a substitute for professional medical advice. Results should be reviewed by a qualified radiologist.')
+
+  const filename = `MRI_Report_${result.request_id || Date.now()}.pdf`
+  doc.save(filename)
 }
 
 function App() {
@@ -386,6 +476,13 @@ function App() {
                 ← Back
               </button>
               <h2>MRI AI Diagnostic Dashboard</h2>
+              <button
+                type="button"
+                className="btn-download-pdf"
+                onClick={() => exportReportToPdf(result, previewUrl)}
+              >
+                Download PDF
+              </button>
             </div>
 
             {(result.artifacts?.uploaded_image_url || previewUrl) && (
