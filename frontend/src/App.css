@@ -12,10 +12,14 @@
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
   --gray-500: #64748b;
   --gray-600: #475569;
   --gray-700: #334155;
   --gray-900: #0f172a;
+  --conf-high: #22c55e;
+  --conf-medium: #eab308;
+  --conf-low: #ef4444;
 }
 
 body {
@@ -114,7 +118,45 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+
+.api-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+
+.api-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.api-status-dot.online {
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+}
+
+.api-status-dot.offline {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.api-status-dot.loading {
+  background: var(--gray-400);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.api-status-text {
+  font-weight: 500;
 }
 
 .btn-theme-toggle {
@@ -912,6 +954,39 @@ body {
   margin: 0;
 }
 
+.conf-badge {
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.conf-badge.conf-high {
+  background: rgba(34, 197, 94, 0.2);
+  color: #15803d;
+}
+
+.conf-badge.conf-medium {
+  background: rgba(234, 179, 8, 0.25);
+  color: #a16207;
+}
+
+.conf-badge.conf-low {
+  background: rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+}
+
+.prob-fill.conf-high { background: var(--conf-high); }
+.prob-fill.conf-medium { background: var(--conf-medium); }
+.prob-fill.conf-low { background: var(--conf-low); }
+
+.card-prediction.conf-high { box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); }
+.card-prediction.conf-medium { box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25); }
+.card-prediction.conf-low { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
+
+.card-prediction .conf-badge.conf-high { background: rgba(255,255,255,0.3); color: #bbf7d0; }
+.card-prediction .conf-badge.conf-medium { background: rgba(255,255,255,0.3); color: #fef08a; }
+.card-prediction .conf-badge.conf-low { background: rgba(255,255,255,0.3); color: #fecaca; }
+
 .prediction-inconclusive {
   font-size: 1.25rem;
   font-weight: 600;
@@ -1138,7 +1213,15 @@ body {
   font-size: 0.75rem;
   color: var(--gray-500);
   text-align: center;
+  margin: 0 0 0.35rem 0;
+}
+
+.footer-model-info {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  text-align: center;
   margin: 0;
+  opacity: 0.85;
 }
 
 /* ========== DARK MODE ========== */
@@ -1214,6 +1297,11 @@ html[data-theme="dark"] body {
 .app.dark .footer-nav .nav-item:hover,
 .app.dark .footer-nav .nav-item.active { color: var(--purple-light); }
 .app.dark .disclaimer { color: var(--text-muted); }
+.app.dark .footer-model-info { color: var(--text-muted); }
+.app.dark .api-status { color: var(--text-muted); }
+.app.dark .conf-badge.conf-high { background: rgba(34, 197, 94, 0.25); color: #86efac; }
+.app.dark .conf-badge.conf-medium { background: rgba(234, 179, 8, 0.25); color: #fde047; }
+.app.dark .conf-badge.conf-low { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 
 /* Home */
 .app.dark .home-section::before {

@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 
 const API_URL = '/api/v1/analyze'
+const HEALTHZ_URL = '/healthz'
 
 function formatLabel(label) {
   if (!label) return ''
@@ -15,6 +16,12 @@ function formatLabel(label) {
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
+}
+
+function getConfidenceBand(confidence) {
+  if (confidence >= 0.8) return 'high'
+  if (confidence >= 0.6) return 'medium'
+  return 'low'
 }
 
 function exportReportToPdf(result, previewUrl) {
@@ -129,6 +136,22 @@ function App() {
       localStorage.setItem('darkMode', darkMode)
     } catch {}
   }, [darkMode])
+
+  const [apiStatus, setApiStatus] = useState({ ok: false, model_loaded: false, loading: true })
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const res = await fetch(HEALTHZ_URL)
+        const data = await res.json()
+        setApiStatus({ ok: data.ok ?? false, model_loaded: data.model_loaded ?? false, loading: false })
+      } catch {
+        setApiStatus({ ok: false, model_loaded: false, loading: false })
+      }
+    }
+    fetchHealth()
+    const interval = setInterval(fetchHealth, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Auth form state (placeholder - no backend)
   const [loginEmail, setLoginEmail] = useState('')
@@ -280,6 +303,12 @@ function App() {
           </nav>
         </div>
         <div className="header-actions">
+          <div className="api-status" title={apiStatus.loading ? 'Checking...' : apiStatus.model_loaded ? 'API online • Model loaded' : 'API offline or model not loaded'}>
+            <span className={`api-status-dot ${apiStatus.loading ? 'loading' : apiStatus.ok ? 'online' : 'offline'}`} />
+            <span className="api-status-text">
+              {apiStatus.loading ? 'Checking...' : apiStatus.model_loaded ? 'API online' : 'Offline'}
+            </span>
+          </div>
           <button
             type="button"
             className="btn-theme-toggle"
@@ -497,13 +526,13 @@ function App() {
             )}
 
             {/* Primary Detection */}
-            <div className="card card-prediction">
+            <div className={`card card-prediction conf-${result.vision ? getConfidenceBand(result.vision.confidence || 0) : 'low'}`}>
               <h3>Primary Detection</h3>
               {result.vision ? (
                 <>
                   <p className="prediction-label">{formatLabel(result.vision.label)}</p>
                   <p className="prediction-confidence">
-                    Confidence: {Math.round((result.vision.confidence || 0) * 100)}%
+                    Confidence: <span className={`conf-badge conf-${getConfidenceBand(result.vision.confidence || 0)}`}>{Math.round((result.vision.confidence || 0) * 100)}%</span>
                   </p>
                 </>
               ) : (
@@ -542,14 +571,15 @@ function App() {
                     .map(([label, prob]) => {
                       const pct = Math.round(prob * 100)
                       const isHighest = label === result.vision.label
+                      const band = getConfidenceBand(prob)
                       return (
                         <div key={label} className={`prob-item ${isHighest ? 'prob-item-highlight' : ''}`}>
                           <div className="prob-header">
                             <span>{formatLabel(label)}</span>
-                            <span>{pct}%</span>
+                            <span className={`conf-badge conf-${band}`}>{pct}%</span>
                           </div>
                           <div className="prob-bar">
-                            <div className="prob-fill" style={{ width: `${pct}%` }} />
+                            <div className={`prob-fill conf-${band}`} style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                       )
@@ -809,6 +839,7 @@ function App() {
         <p className="disclaimer">
           ⚠️ For educational purposes only. Not a substitute for professional medical advice.
         </p>
+        <p className="footer-model-info">Model v1.0 • VGG CNN</p>
       </footer>
     </div>
   )
