@@ -8,7 +8,6 @@ import { useState, useRef, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 
 const API_URL = '/api/v1/analyze'
-const HEALTHZ_URL = '/healthz'
 
 function formatLabel(label) {
   if (!label) return ''
@@ -137,21 +136,6 @@ function App() {
     } catch {}
   }, [darkMode])
 
-  const [apiStatus, setApiStatus] = useState({ ok: false, model_loaded: false, loading: true })
-  useEffect(() => {
-    const fetchHealth = async () => {
-      try {
-        const res = await fetch(HEALTHZ_URL)
-        const data = await res.json()
-        setApiStatus({ ok: data.ok ?? false, model_loaded: data.model_loaded ?? false, loading: false })
-      } catch {
-        setApiStatus({ ok: false, model_loaded: false, loading: false })
-      }
-    }
-    fetchHealth()
-    const interval = setInterval(fetchHealth, 30000)
-    return () => clearInterval(interval)
-  }, [])
 
   // Auth form state (placeholder - no backend)
   const [loginEmail, setLoginEmail] = useState('')
@@ -306,12 +290,6 @@ function App() {
           </nav>
         </div>
         <div className="header-actions">
-          <div className="api-status" title={apiStatus.loading ? 'Checking...' : apiStatus.model_loaded ? 'API online • Model loaded' : 'API offline or model not loaded'}>
-            <span className={`api-status-dot ${apiStatus.loading ? 'loading' : apiStatus.ok ? 'online' : 'offline'}`} />
-            <span className="api-status-text">
-              {apiStatus.loading ? 'Checking...' : apiStatus.model_loaded ? 'API online' : 'Offline'}
-            </span>
-          </div>
           <button
             type="button"
             className="btn-theme-toggle"

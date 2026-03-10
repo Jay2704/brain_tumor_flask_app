@@ -118,45 +118,7 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-
-.api-status {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  color: var(--gray-500);
-}
-
-.api-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.api-status-dot.online {
-  background: #22c55e;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
-}
-
-.api-status-dot.offline {
-  background: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
-}
-
-.api-status-dot.loading {
-  background: var(--gray-400);
-  animation: pulse-dot 1.2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.api-status-text {
-  font-weight: 500;
+  gap: 0.5rem;
 }
 
 .btn-theme-toggle {
@@ -1331,7 +1293,6 @@ html[data-theme="dark"] body {
 .app.dark .footer-nav .nav-item.active { color: var(--purple-light); }
 .app.dark .disclaimer { color: var(--text-muted); }
 .app.dark .footer-model-info { color: var(--text-muted); }
-.app.dark .api-status { color: var(--text-muted); }
 .app.dark .conf-badge.conf-high { background: rgba(34, 197, 94, 0.25); color: #86efac; }
 .app.dark .conf-badge.conf-medium { background: rgba(234, 179, 8, 0.25); color: #fde047; }
 .app.dark .conf-badge.conf-low { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
