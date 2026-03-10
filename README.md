@@ -145,7 +145,8 @@ Set a repository variable named `VITE_API_BASE_URL` in GitHub:
 ### Important Notes
 
 - **Model file location:** Make sure the model exists at `models/Brain_Tumors_vgg_final.h5` on the deployed server.
-- **Python version on Render:** Use Python `3.10.13` (via `runtime.txt`) for TensorFlow compatibility.
+- **Python version on Render:** Use Python `3.10.13` for TensorFlow compatibility.
+- **Preferred Render config:** Set environment variable `PYTHON_VERSION=3.10.13`.
 - **Free plan behavior:** Render free web services can sleep after inactivity, so the first request after idle time may be slow.
 - **Frontend API URL:** Set `VITE_API_BASE_URL` to your deployed Render backend URL so the frontend calls the correct API in production.
 
