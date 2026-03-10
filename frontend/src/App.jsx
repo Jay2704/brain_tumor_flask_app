@@ -156,7 +156,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${view === 'home' ? 'app-home' : ''}`}>
       <header className="header">
         <div className="header-left">
           <button type="button" className="header-logo" onClick={() => setView('home')}>
@@ -185,16 +185,59 @@ function App() {
         </div>
       </header>
 
-      <main className="main">
+      <main className={`main ${view === 'home' ? 'main-home' : ''}`}>
         {view === 'home' && (
           <section className="home-section">
-            <h1>Medical MRI Diagnosis AI</h1>
-            <p className="home-subtitle">
-              AI-powered brain MRI analysis for preliminary screening. Upload your scans for instant insights on glioma, meningioma, pituitary, and no-tumor classification.
-            </p>
-            <button type="button" className="btn-cta" onClick={() => setView('upload')}>
-              Upload MRI Image
-            </button>
+            <div className="home-hero">
+              <span className="home-badge">AI-Powered Radiology Support</span>
+              <h1 className="home-title">
+                <span className="home-title-gradient">Medical MRI</span>
+                <br />
+                Diagnosis AI
+              </h1>
+              <p className="home-subtitle">
+                Upload brain MRI scans for instant, AI-powered preliminary analysis. Our VGG-based CNN classifies scans into four categories—supporting radiologists with fast, consistent screening.
+              </p>
+              <button type="button" className="btn-cta" onClick={() => setView('upload')}>
+                Upload MRI Image →
+              </button>
+            </div>
+
+            <div className="home-stats">
+              <div className="home-stat">
+                <span className="home-stat-value">4</span>
+                <span className="home-stat-label">Tumor Types</span>
+              </div>
+              <div className="home-stat">
+                <span className="home-stat-value">~94%</span>
+                <span className="home-stat-label">Accuracy</span>
+              </div>
+              <div className="home-stat">
+                <span className="home-stat-value">{'<'}30s</span>
+                <span className="home-stat-label">Analysis Time</span>
+              </div>
+            </div>
+
+            <div className="home-cards">
+              <div className="home-card">
+                <h3>How It Works</h3>
+                <ol>
+                  <li>Upload your MRI scan (PNG/JPG)</li>
+                  <li>AI validates quality & runs inference</li>
+                  <li>Get findings, impression & next steps</li>
+                </ol>
+              </div>
+              <div className="home-card">
+                <h3>What We Detect</h3>
+                <ul>
+                  <li><strong>Glioma</strong> — glial cell tumors</li>
+                  <li><strong>Meningioma</strong> — meninges tumors</li>
+                  <li><strong>Pituitary</strong> — pituitary adenomas</li>
+                  <li><strong>No Tumor</strong> — within normal limits</li>
+                </ul>
+              </div>
+            </div>
+
             <div className="home-features">
               <div className="home-feature">
                 <span className="home-feature-icon">🛡️</span>
