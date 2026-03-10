@@ -1,4 +1,5 @@
 from flask import Flask, Response, jsonify, render_template, request, redirect, url_for
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import logging
 import os
@@ -8,6 +9,7 @@ import tensorflow as tf
 from agent.orchestrator import run as orchestrate
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
@@ -16,26 +18,6 @@ MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
-
-CORS_ROUTES = {"/api/analyze", "/api/v1/analyze", "/healthz"}
-
-
-@app.after_request
-def add_cors_headers(response):
-    """Add CORS headers for API routes (React dev server)."""
-    if request.path in CORS_ROUTES:
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    return response
-
-
-@app.before_request
-def handle_options_preflight():
-    """Respond to OPTIONS preflight for CORS."""
-    if request.method == "OPTIONS" and request.path in CORS_ROUTES:
-        return Response("", status=204)
-
 
 def allowed_file(filename):
     """Check if the file has an allowed extension."""
@@ -61,13 +43,13 @@ CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
 @app.route("/healthz", methods=["GET"])
 def healthz():
-    """Health check. Returns JSON {ok, model_loaded, model_path}. 200 when healthy, 500 when model unavailable."""
+    """Health check. Returns JSON {ok, model_loaded, service}."""
     model_loaded = model is not None
     ok = model_loaded
     payload = {
         "ok": ok,
         "model_loaded": model_loaded,
-        "model_path": os.path.abspath(model_path),
+        "service": "Medical MRI Diagnosis AI Agent API",
     }
     status = 200 if ok else 500
     return jsonify(payload), status

@@ -45,7 +45,7 @@ A full-stack web application for brain MRI tumor classification. Upload an MRI s
 
 ---
 
-## Setup and Run
+## Local Development
 
 ### 1. Clone the Repository
 
@@ -73,6 +73,13 @@ models/Brain_Tumors_vgg_final.h5
 ```bash
 cd frontend
 npm install
+cp .env.example .env
+```
+
+Set `VITE_API_BASE_URL` in `frontend/.env`:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:5001
 ```
 
 ### 4. Run the Application
@@ -82,6 +89,12 @@ npm install
 python app.py
 ```
 Backend runs at `http://127.0.0.1:5001`
+
+For production, use Gunicorn instead of the Flask development server:
+
+```bash
+gunicorn app:app
+```
 
 **Terminal 2 – Frontend:**
 ```bash
@@ -93,6 +106,67 @@ Frontend runs at `http://127.0.0.1:5173`
 ### 5. Access
 
 Open **http://127.0.0.1:5173** in your browser. The React app proxies `/api`, `/healthz`, and `/static` to the Flask backend.
+
+---
+
+## Environment Variables Configuration
+
+### Frontend (`frontend/.env`)
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:5001
+```
+
+- Used by the React app for API calls (for example: `${VITE_API_BASE_URL}/api/v1/analyze`).
+- For production, set this to your deployed backend URL.
+
+### GitHub Actions (for Pages build)
+
+Set a repository variable named `VITE_API_BASE_URL` in GitHub:
+
+- Repository Settings → Secrets and variables → Actions → Variables
+- Name: `VITE_API_BASE_URL`
+- Value: your backend base URL (for example `https://your-api.example.com`)
+
+---
+
+## Backend Deployment Instructions
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the backend with Gunicorn in production:
+
+```bash
+gunicorn app:app
+```
+
+Optional (equivalent WSGI entrypoint):
+
+```bash
+gunicorn wsgi:app
+```
+
+---
+
+## Frontend Deployment via GitHub Actions
+
+The project includes a GitHub Pages workflow at:
+
+`/.github/workflows/deploy-frontend.yml`
+
+What it does:
+- Triggers on push to `main`
+- Uses Node.js 20
+- Installs dependencies in `frontend/`
+- Builds the frontend with `npm run build`
+- Uploads `frontend/dist` as the Pages artifact
+- Deploys to GitHub Pages
+
+Before deploying, set the GitHub Actions variable `VITE_API_BASE_URL` to your backend URL.
 
 ---
 
@@ -148,7 +222,7 @@ brain_tumor_flask_app/
 
 ---
 
-## Backend API
+## API Documentation for /api/v1/analyze
 
 ### POST /api/v1/analyze
 
@@ -177,7 +251,7 @@ When QA blocks inference, `vision` is `null` but the response is still 200 with 
 
 ### GET /healthz
 
-Returns `{ok, model_loaded, model_path}`. 200 when healthy, 500 when model unavailable.
+Returns `{ok, model_loaded, service}`. 200 when healthy, 500 when model unavailable.
 
 ---
 
@@ -230,13 +304,19 @@ npm run build
 
 Output in `frontend/dist/`. Serve the backend and configure it to serve the built React app from `dist/` for production deployment.
 
+To run the backend in production:
+
+```bash
+gunicorn app:app
+```
+
 ---
 
 ## Troubleshooting
 
 - **Model loading error:** Ensure `Brain_Tumors_vgg_final.h5` is in the `models/` folder. The app starts even if the model fails; `/healthz` returns 500 and the API returns a friendly error.
 - **Port in use:** Change `app.run(port=5001)` in `app.py` and update the proxy in `frontend/vite.config.js` if needed.
-- **CORS:** Backend has CORS enabled for `/api/v1/analyze`, `/api/analyze`, `/healthz`. Vite dev server proxies these to avoid cross-origin issues.
+- **CORS:** Backend CORS is enabled for `/api/*`. Vite dev server proxy can still be used for local development.
 
 ---
 

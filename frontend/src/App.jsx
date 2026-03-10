@@ -1,5 +1,5 @@
 /**
- * Medical MRI Diagnosis AI Agent - Interactive UI
+ * Brain Tumor Detection Using AI - Interactive UI
  *
  * Features: drag-and-drop upload, loading state with progress steps,
  * results dashboard, dark mode, PDF export. Connects to POST /api/v1/analyze.
@@ -7,7 +7,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 
-const API_URL = '/api/v1/analyze'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
 
 function formatLabel(label) {
   if (!label) return ''
@@ -237,7 +237,7 @@ function App() {
       const formData = new FormData()
       formData.append('image', file)
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
         method: 'POST',
         body: formData,
       })
@@ -415,7 +415,7 @@ function App() {
 
         {view === 'upload' && (
           <section className="upload-section">
-            <h1>Medical MRI Diagnosis AI Agent</h1>
+            <h1>Brain Tumor Detection Using AI</h1>
             <p className="subtitle">
               Upload your MRI scans for instant AI-powered clinical insights and preliminary analysis.
             </p>

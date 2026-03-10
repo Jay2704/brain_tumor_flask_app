@@ -13,9 +13,28 @@ Minimal React frontend for the Brain Tumor Detection Flask API.
 # Install dependencies
 npm install
 
+# Create local environment file
+cp .env.example .env
+
 # Start the dev server (runs on http://localhost:5173)
 npm run dev
 ```
+
+## Environment Variables
+
+Create a `.env` file in `frontend/` (you can copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Set:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:5001
+```
+
+For local development, keep this pointed to your Flask backend.
 
 The Vite dev server proxies `/api`, `/healthz`, and `/static` to the Flask backend, so API calls and image previews work without CORS issues.
 
