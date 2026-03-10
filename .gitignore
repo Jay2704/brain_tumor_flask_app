@@ -1,11 +1,8 @@
-# Model files (heavy, download separately)
-model/*.h5
-models/*.h5
-
 # Python
 __pycache__/
 agent/__pycache__/
 ml/__pycache__/
+*.pyc
 venv/
 
 # Uploads

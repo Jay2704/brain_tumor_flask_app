@@ -11,7 +11,9 @@ from agent.orchestrator import run as orchestrate
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-UPLOAD_FOLDER = "static/uploads"
+# Resolve project paths from this file location (stable across cwd differences).
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
 
@@ -29,8 +31,9 @@ def api_error(code: str, message: str, status: int = 400):
     return jsonify({"error": {"code": code, "message": message}}), status
 
 
-# Load the pre-trained model (graceful failure so server can start)
-model_path = "./models/Brain_Tumors_vgg_final.h5"
+# Load the pre-trained model (graceful failure so server can start).
+# Model path is absolute and rooted at BASE_DIR to avoid cwd-related failures.
+model_path = os.path.join(BASE_DIR, "models", "Brain_Tumors_vgg_final.h5")
 model = None
 try:
     model = tf.keras.models.load_model(model_path)
@@ -43,13 +46,15 @@ CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
 @app.route("/healthz", methods=["GET"])
 def healthz():
-    """Health check. Returns JSON {ok, model_loaded, service}."""
+    # Use this endpoint for backend readiness checks in local/prod environments.
+    """Health check for load balancers and uptime probes."""
     model_loaded = model is not None
     ok = model_loaded
     payload = {
         "ok": ok,
         "model_loaded": model_loaded,
         "service": "Medical MRI Diagnosis AI Agent API",
+        "model_path": model_path,
     }
     status = 200 if ok else 500
     return jsonify(payload), status
@@ -155,7 +160,7 @@ def api_v1_analyze():
         if model is None:
             return api_error(
                 "MODEL_UNAVAILABLE",
-                "The model file was not found or failed to load. Please ensure Brain_Tumors_vgg_final.h5 exists in the models/ folder and restart the application.",
+                "Model is not available on the server.",
                 503,
             )
 
@@ -195,4 +200,5 @@ def contact():
 
 
 if __name__ == "__main__":
+    # Production entrypoint: gunicorn wsgi:app
     app.run(port=5001, debug=True)

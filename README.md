@@ -132,21 +132,26 @@ Set a repository variable named `VITE_API_BASE_URL` in GitHub:
 
 ## Backend Deployment Instructions
 
-Install dependencies:
+### Deploy Flask Backend to Render (Beginner-Friendly)
+
+1. Push your project to GitHub.
+2. In Render, click **New +** → **Web Service** and connect your repository.
+3. Configure the service:
+   - **Environment:** `Python`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn wsgi:app`
+4. Deploy the service and wait for the build to finish.
+
+### Important Notes
+
+- **Model file location:** Make sure the model exists at `models/Brain_Tumors_vgg_final.h5` on the deployed server.
+- **Free plan behavior:** Render free web services can sleep after inactivity, so the first request after idle time may be slow.
+- **Frontend API URL:** Set `VITE_API_BASE_URL` to your deployed Render backend URL so the frontend calls the correct API in production.
+
+### Local Production-Style Run (Optional)
 
 ```bash
 pip install -r requirements.txt
-```
-
-Run the backend with Gunicorn in production:
-
-```bash
-gunicorn app:app
-```
-
-Optional (equivalent WSGI entrypoint):
-
-```bash
 gunicorn wsgi:app
 ```
 
