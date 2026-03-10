@@ -86,6 +86,15 @@ def request_entity_too_large(error):
     return render_template("index.html", error="File too large. Maximum size is 5 MB."), 413
 
 
+@app.errorhandler(500)
+def internal_server_error(error):
+    """Ensure API routes always return JSON on 500."""
+    if request.path.startswith("/api/"):
+        msg = str(getattr(error, "description", None) or getattr(error, "message", str(error)))
+        return api_error("INTERNAL_SERVER_ERROR", msg or "Internal server error", 500)
+    return Response("Internal Server Error", status=500, mimetype="text/plain")
+
+
 @app.route("/upload", methods=["POST"])
 def upload_image():
     if "image" not in request.files:
@@ -142,37 +151,37 @@ def upload_image():
 @app.route("/api/v1/analyze", methods=["POST"])
 def api_v1_analyze():
     """Analyze uploaded MRI image. Returns standardized JSON."""
-    if "image" not in request.files:
-        return api_error("MISSING_FILE", "No file selected. Use multipart form field 'image'.", 400)
-
-    image = request.files["image"]
-    if image.filename == "":
-        return api_error("EMPTY_FILENAME", "No file selected.", 400)
-
-    if not allowed_file(image.filename):
-        return api_error(
-            "UNSUPPORTED_EXTENSION",
-            "Invalid file type. Allowed: PNG, JPG, JPEG.",
-            400,
-        )
-
-    filename = secure_filename(image.filename)
-    if filename == "":
-        return api_error("INVALID_FILENAME", "Invalid filename.", 400)
-
-    if model is None:
-        return api_error(
-            "MODEL_UNAVAILABLE",
-            "The model file was not found or failed to load. Please ensure Brain_Tumors_vgg_final.h5 exists in the models/ folder and restart the application.",
-            503,
-        )
-
-    file_prefix = str(uuid.uuid4())
-    safe_name = f"{file_prefix}_{filename}"
-    image_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
-    image.save(image_path)
-
     try:
+        if "image" not in request.files:
+            return api_error("MISSING_FILE", "No file selected. Use multipart form field 'image'.", 400)
+
+        image = request.files["image"]
+        if image.filename == "":
+            return api_error("EMPTY_FILENAME", "No file selected.", 400)
+
+        if not allowed_file(image.filename):
+            return api_error(
+                "UNSUPPORTED_EXTENSION",
+                "Invalid file type. Allowed: PNG, JPG, JPEG.",
+                400,
+            )
+
+        filename = secure_filename(image.filename)
+        if filename == "":
+            return api_error("INVALID_FILENAME", "Invalid filename.", 400)
+
+        if model is None:
+            return api_error(
+                "MODEL_UNAVAILABLE",
+                "The model file was not found or failed to load. Please ensure Brain_Tumors_vgg_final.h5 exists in the models/ folder and restart the application.",
+                503,
+            )
+
+        file_prefix = str(uuid.uuid4())
+        safe_name = f"{file_prefix}_{filename}"
+        image_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
+        image.save(image_path)
+
         uploaded_image_url = url_for("static", filename=f"uploads/{safe_name}")
         result = orchestrate(image_path, model, CLASS_LABELS, uploaded_image_url)
         if not result["qa"].get("safe_to_infer", False):

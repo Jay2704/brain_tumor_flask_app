@@ -242,11 +242,25 @@ function App() {
         body: formData,
       })
 
-      const data = await response.json()
+      const text = await response.text()
       setLoadingStep(3)
 
+      let data
+      try {
+        data = text && text.trim() ? JSON.parse(text) : {}
+      } catch {
+        const hint = !text || !text.trim()
+          ? 'Server returned empty response. Ensure the Flask backend is running on port 5001 and the model file exists.'
+          : 'Server returned invalid response. Check that the backend is running and the model is loaded.'
+        throw new Error(hint)
+      }
+
       if (!response.ok) {
-        const msg = data?.error?.message || data?.error || `Request failed (${response.status})`
+        const err = data?.error
+        const msg =
+          (typeof err === 'string' ? err : err?.message) ||
+          data?.message ||
+          `Request failed (${response.status})`
         throw new Error(msg)
       }
 
@@ -254,7 +268,14 @@ function App() {
       await new Promise((r) => setTimeout(r, 400))
       setView('results')
     } catch (err) {
-      setError(err.message || 'Analysis failed.')
+      const msg = err.message || 'Analysis failed.'
+      const isConnectionError = /failed to fetch|networkerror|ECONNREFUSED|connection refused/i.test(msg) ||
+        (msg.includes('Request failed') && (msg.includes('500') || msg.includes('502') || msg.includes('503')))
+      setError(
+        isConnectionError
+          ? 'Backend unavailable. Start the Flask server: run `python app.py` from the project root (port 5001).'
+          : msg
+      )
       setView('upload')
     } finally {
       setLoading(false)
@@ -382,7 +403,7 @@ function App() {
             <div className="home-features">
               <div className="home-feature">
                 <span className="home-feature-icon">🛡️</span>
-                <span>HIPAA Compliant</span>
+                <span>Privacy First</span>
               </div>
               <div className="home-feature">
                 <span className="home-feature-icon">⏱</span>
@@ -426,7 +447,7 @@ function App() {
             <div className="feature-cards">
               <div className="feature-card">
                 <span className="feature-icon">🛡️</span>
-                <span>HIPAA Compliant</span>
+                <span>Privacy First</span>
               </div>
               <div className="feature-card">
                 <span className="feature-icon">⏱</span>
@@ -488,7 +509,7 @@ function App() {
             </div>
 
             <div className="loading-footer">
-              <span>🛡️ HIPAA Compliant Processing</span>
+              <span>🛡️ Privacy-First Processing</span>
             </div>
           </section>
         )}
