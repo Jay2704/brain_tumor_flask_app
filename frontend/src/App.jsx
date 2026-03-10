@@ -148,9 +148,9 @@ function App() {
   const TUMOR_TYPES = [
     {
       name: 'Glioma',
-      desc: 'Gliomas originate from glial cells—the supportive cells of the brain and spinal cord. They are the most common type of primary brain tumor, accounting for roughly one-third of all brain tumors.',
+      desc: 'Gliomas originate from glial cells—the supportive cells of the brain and spinal cord. They are the most common type of primary brain tumor, accounting for roughly one third of all brain tumors.',
       details: [
-        'Gliomas are graded I–IV based on growth rate and aggressiveness. Low-grade (I–II) tumors grow slowly; high-grade (III–IV) glioblastomas are aggressive and fast-growing.',
+        'Gliomas are graded I–IV based on growth rate and aggressiveness. Low grade (I–II) tumors grow slowly; high grade (III–IV) glioblastomas are aggressive and fast growing.',
         'Common subtypes include astrocytomas, oligodendrogliomas, and glioblastomas. Glioblastoma multiforme (GBM) is the most aggressive and common malignant brain tumor in adults.',
         'Symptoms may include headaches, seizures, nausea, vision or speech changes, weakness, and cognitive decline. Location of the tumor affects which symptoms appear.',
         'Treatment typically involves surgery when possible, followed by radiation and chemotherapy. Prognosis varies widely by grade and subtype.',
@@ -170,7 +170,7 @@ function App() {
       name: 'Pituitary',
       desc: 'Pituitary tumors develop in the pituitary gland, a small structure at the base of the brain that controls many hormones. Most pituitary tumors are benign adenomas and do not spread beyond the skull.',
       details: [
-        'Pituitary adenomas can be functioning (produce excess hormones) or non-functioning. Functioning tumors may cause Cushing disease, acromegaly, or prolactin excess.',
+        'Pituitary adenomas can be functioning (produce excess hormones) or nonfunctioning. Functioning tumors may cause Cushing disease, acromegaly, or prolactin excess.',
         'The pituitary sits near the optic nerves, so tumors can cause vision loss, especially peripheral vision, and headaches. Hormone changes may cause fatigue, weight changes, or menstrual irregularities.',
         'Diagnosis often involves MRI, hormone blood tests, and visual field testing. Many small tumors are found incidentally.',
         'Treatment may include observation, medication (e.g., for prolactinomas), surgery (often transsphenoidal), and sometimes radiation.',
@@ -267,28 +267,30 @@ function App() {
 
   return (
     <div className={`app ${view === 'home' ? 'app-home' : ''} ${darkMode ? 'dark' : ''}`}>
-      <header className="header">
-        <div className="header-left">
-          <button type="button" className="header-logo" onClick={() => setView('home')}>
-            <span className="logo-icon">🔬</span>
-            <span>MRI Diagnosis AI</span>
+      <aside className="sidebar">
+        <button type="button" className="sidebar-logo" onClick={() => setView('home')}>
+          <span className="logo-icon">🔬</span>
+          <span>MRI Diagnosis AI</span>
+        </button>
+        <nav className="sidebar-nav">
+          <button type="button" className={`sidebar-link ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+            <span className="sidebar-link-icon">🏠</span>
+            Home
           </button>
-          <nav className="header-nav">
-            <button type="button" className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
-              Home
-            </button>
-            <button type="button" className={`nav-link ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => setView('upload')}>
-              Diagnosis AI
-            </button>
-            <button type="button" className={`nav-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
-              Brain Tumor Types
-            </button>
-            <button type="button" className={`nav-link ${view === 'future-work' ? 'active' : ''}`} onClick={() => setView('future-work')}>
-              Future Work
-            </button>
-          </nav>
-        </div>
-        <div className="header-actions">
+          <button type="button" className={`sidebar-link ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => setView('upload')}>
+            <span className="sidebar-link-icon">🔬</span>
+            Diagnosis AI
+          </button>
+          <button type="button" className={`sidebar-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
+            <span className="sidebar-link-icon">📋</span>
+            Brain Tumor Types
+          </button>
+          <button type="button" className={`sidebar-link ${view === 'future-work' ? 'active' : ''}`} onClick={() => setView('future-work')}>
+            <span className="sidebar-link-icon">🚀</span>
+            Future Work
+          </button>
+        </nav>
+        <div className="sidebar-actions">
           <button
             type="button"
             className="btn-theme-toggle"
@@ -305,8 +307,9 @@ function App() {
             Sign Up
           </button>
         </div>
-      </header>
+      </aside>
 
+      <div className="app-content">
       <main className={`main ${view === 'home' ? 'main-home' : ''}`}>
         {view === 'home' && (
           <section className="home-section">
@@ -317,9 +320,11 @@ function App() {
                 <br />
                 Diagnosis AI
               </h1>
-              <p className="home-subtitle">
-                Upload brain MRI scans for instant, AI-powered preliminary analysis. Our AI classifies scans into four categories—supporting radiologists with fast, consistent screening.
-              </p>
+              <div className="home-subtitle-block">
+                <p className="home-subtitle">
+                  Upload brain MRI scans for instant, AI-powered preliminary analysis. Our AI classifies scans into four categories—supporting radiologists with fast, consistent screening.
+                </p>
+              </div>
               <button type="button" className="btn-cta" onClick={() => setView('upload')}>
                 Upload MRI Image →
               </button>
@@ -655,9 +660,9 @@ function App() {
                   AI-powered analysis of chest X-rays and CT scans for pulmonary conditions including pneumonia, lung nodules, tuberculosis, and other respiratory abnormalities.
                 </p>
                 <ul className="future-work-details">
-                  <li>Chest X-ray screening for pneumonia and COVID-19-related findings</li>
+                  <li>Chest X-ray screening for pneumonia and COVID-19 related findings</li>
                   <li>CT lung nodule detection and size estimation</li>
-                  <li>Support for tuberculosis screening in high-burden regions</li>
+                  <li>Support for tuberculosis screening in high burden regions</li>
                   <li>Integration with existing radiology workflows</li>
                 </ul>
               </article>
@@ -686,9 +691,9 @@ function App() {
                   <li><strong>Batch processing</strong> — Analyze multiple scans in one session</li>
                   <li><strong>DICOM support</strong> — Native support for standard medical imaging format</li>
                   <li><strong>API access</strong> — REST API for third-party EHR and PACS integration</li>
-                  <li><strong>Mobile app</strong> — iOS and Android apps for on-the-go review</li>
-                  <li><strong>Multi-language reports</strong> — Localized findings and impressions</li>
-                  <li><strong>Comparison tracking</strong> — Compare scans over time for follow-up</li>
+                  <li><strong>Mobile app</strong> — iOS and Android apps for on the go review</li>
+                  <li><strong>Multilanguage reports</strong> — Localized findings and impressions</li>
+                  <li><strong>Comparison tracking</strong> — Compare scans over time for follow up</li>
                 </ul>
               </article>
             </div>
@@ -877,6 +882,7 @@ function App() {
           ⚠️ For educational purposes only. Not a substitute for professional medical advice.
         </p>
       </footer>
+      </div>
     </div>
   )
 }
