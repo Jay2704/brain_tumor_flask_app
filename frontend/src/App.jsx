@@ -123,7 +123,13 @@ function App() {
       return false
     }
   })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const fileInputRef = useRef(null)
+
+  const handleNavClick = (viewName) => {
+    setView(viewName)
+    setSidebarOpen(false)
+  }
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
@@ -267,25 +273,26 @@ function App() {
 
   return (
     <div className={`app ${view === 'home' ? 'app-home' : ''} ${darkMode ? 'dark' : ''}`}>
-      <aside className="sidebar">
-        <button type="button" className="sidebar-logo" onClick={() => setView('home')}>
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <button type="button" className="sidebar-logo" onClick={() => handleNavClick('home')}>
           <span className="logo-icon">🔬</span>
           <span>MRI Diagnosis AI</span>
         </button>
         <nav className="sidebar-nav">
-          <button type="button" className={`sidebar-link ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+          <button type="button" className={`sidebar-link ${view === 'home' ? 'active' : ''}`} onClick={() => handleNavClick('home')}>
             <span className="sidebar-link-icon">🏠</span>
             Home
           </button>
-          <button type="button" className={`sidebar-link ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => setView('upload')}>
+          <button type="button" className={`sidebar-link ${view === 'upload' || view === 'loading' || view === 'results' ? 'active' : ''}`} onClick={() => handleNavClick('upload')}>
             <span className="sidebar-link-icon">🔬</span>
             Diagnosis AI
           </button>
-          <button type="button" className={`sidebar-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => setView('tumor-types')}>
+          <button type="button" className={`sidebar-link ${view === 'tumor-types' ? 'active' : ''}`} onClick={() => handleNavClick('tumor-types')}>
             <span className="sidebar-link-icon">📋</span>
             Brain Tumor Types
           </button>
-          <button type="button" className={`sidebar-link ${view === 'future-work' ? 'active' : ''}`} onClick={() => setView('future-work')}>
+          <button type="button" className={`sidebar-link ${view === 'future-work' ? 'active' : ''}`} onClick={() => handleNavClick('future-work')}>
             <span className="sidebar-link-icon">🚀</span>
             Future Work
           </button>
@@ -300,16 +307,27 @@ function App() {
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
-          <button type="button" className="btn-login" onClick={() => { setView('login'); setAuthMessage(null); }}>
+          <button type="button" className="btn-login" onClick={() => { handleNavClick('login'); setAuthMessage(null); }}>
             Login
           </button>
-          <button type="button" className="btn-signup" onClick={() => { setView('signup'); setAuthMessage(null); }}>
+          <button type="button" className="btn-signup" onClick={() => { handleNavClick('signup'); setAuthMessage(null); }}>
             Sign Up
           </button>
         </div>
       </aside>
 
       <div className="app-content">
+        <button
+          type="button"
+          className={`btn-hamburger ${sidebarOpen ? 'open' : ''}`}
+          onClick={() => setSidebarOpen((o) => !o)}
+          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={sidebarOpen}
+        >
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
+        </button>
       <main className={`main ${view === 'home' ? 'main-home' : ''}`}>
         {view === 'home' && (
           <section className="home-section">
