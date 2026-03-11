@@ -238,7 +238,7 @@ function App() {
       const formData = new FormData()
       formData.append('image', file)
       const controller = new AbortController()
-      timeoutId = setTimeout(() => controller.abort(), 20000)
+      timeoutId = setTimeout(() => controller.abort(), 60000)
 
       const response = await fetch(
         `${API_BASE_URL}/api/v1/analyze`,
@@ -276,11 +276,11 @@ function App() {
       setView('results')
     } catch (err) {
       if (err?.name === 'AbortError') {
-        setError('Request timed out after 20 seconds. Please try again.')
+        setError('Request timed out after 60 seconds. Please try again.')
         setView('upload')
         return
       }
-      const msg = err.message || 'Analysis failed.'
+      const msg = err.message || 'We could not analyze this scan. Please try again.'
       const isConnectionError = /failed to fetch|networkerror|ECONNREFUSED|connection refused/i.test(msg) ||
         (msg.includes('Request failed') && (msg.includes('500') || msg.includes('502') || msg.includes('503')))
       setError(
@@ -492,8 +492,15 @@ function App() {
               onClick={handleAnalyze}
               disabled={!file || loading}
             >
-              Analyze Image
+              {loading ? 'Analyzing MRI scan...' : 'Analyze Image'}
             </button>
+
+            {loading && (
+              <div className="analyzing-status" role="status" aria-live="polite">
+                <span className="analyzing-spinner" aria-hidden="true" />
+                <span>Analyzing MRI scan...</span>
+              </div>
+            )}
           </section>
         )}
 
@@ -503,7 +510,7 @@ function App() {
               <span className="loading-dot" />
               AI ANALYSIS IN PROGRESS
             </div>
-            <h2>Analyzing Image...</h2>
+            <h2>Analyzing MRI scan...</h2>
             <p className="loading-subtitle">Processing your scan for anomalies.</p>
 
             <div className="loading-preview">
