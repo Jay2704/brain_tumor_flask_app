@@ -148,6 +148,7 @@ Set a repository variable named `VITE_API_BASE_URL` in GitHub:
 - **Python version on Render:** Use Python `3.10.13` for TensorFlow compatibility.
 - **Preferred Render config:** Set environment variable `PYTHON_VERSION=3.10.13`.
 - **Free plan behavior:** Render free web services can sleep after inactivity, so the first request after idle time may be slow.
+- **Hosting note:** The backend is hosted on Render free tier and may cold start after idle periods.
 - **Memory note:** Free-tier instances can still run out of memory during TensorFlow inference on some requests.
 - **Frontend API URL:** Set `VITE_API_BASE_URL` to your deployed Render backend URL so the frontend calls the correct API in production.
 
@@ -174,7 +175,36 @@ What it does:
 - Uploads `frontend/dist` as the Pages artifact
 - Deploys to GitHub Pages
 
-Before deploying, set the GitHub Actions variable `VITE_API_BASE_URL` to your backend URL.
+### Local Frontend Run
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Use this local API base URL in `frontend/.env`:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:5001
+```
+
+### Production Backend URL (Render)
+
+Set production API base URL in `frontend/.env.production`:
+
+```env
+VITE_API_BASE_URL=https://brain-tumor-detection-53cr.onrender.com
+```
+
+You can also set repository variable `VITE_API_BASE_URL` in GitHub Actions if needed.
+
+### GitHub Pages Deployment Notes
+
+- Vite base path is configured for this repo: `/brain_tumor_detection/`.
+- Build output remains `frontend/dist`.
+- Backend is hosted on Render free tier and may cold start after inactivity.
 
 ---
 
