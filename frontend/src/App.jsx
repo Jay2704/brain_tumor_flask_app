@@ -228,6 +228,7 @@ function App() {
     setResult(null)
     setView('loading')
     setLoadingStep(1)
+    let timeoutId
 
     // Simulate step 1: Image validation (quick)
     await new Promise((r) => setTimeout(r, 400))
@@ -236,11 +237,17 @@ function App() {
     try {
       const formData = new FormData()
       formData.append('image', file)
+      const controller = new AbortController()
+      timeoutId = setTimeout(() => controller.abort(), 20000)
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
-        method: 'POST',
-        body: formData,
-      })
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/analyze`,
+        {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+        }
+      )
 
       const text = await response.text()
       setLoadingStep(3)
@@ -268,6 +275,11 @@ function App() {
       await new Promise((r) => setTimeout(r, 400))
       setView('results')
     } catch (err) {
+      if (err?.name === 'AbortError') {
+        setError('Request timed out after 20 seconds. Please try again.')
+        setView('upload')
+        return
+      }
       const msg = err.message || 'Analysis failed.'
       const isConnectionError = /failed to fetch|networkerror|ECONNREFUSED|connection refused/i.test(msg) ||
         (msg.includes('Request failed') && (msg.includes('500') || msg.includes('502') || msg.includes('503')))
@@ -278,6 +290,7 @@ function App() {
       )
       setView('upload')
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }
