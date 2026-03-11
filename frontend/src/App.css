@@ -330,6 +330,13 @@ body {
   margin: 0;
 }
 
+.hero-disclaimer {
+  margin: 0.9rem 0 0;
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
 .btn-cta {
   padding: 1rem 2rem;
   background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
@@ -804,6 +811,14 @@ body {
   margin-right: auto;
 }
 
+.upload-disclaimer {
+  margin: -0.8rem auto 1.3rem;
+  max-width: 520px;
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
 /* Dropzone */
 .dropzone {
   border: 2px dashed var(--purple-light);
@@ -862,6 +877,32 @@ body {
   margin-top: 0.75rem;
   font-size: 0.85rem;
   color: var(--purple-dark);
+}
+
+.upload-preview-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  padding: 1rem 1rem 1.2rem;
+  margin: 0 0 1.2rem;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
+}
+
+.upload-preview-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  color: var(--gray-700);
+  text-align: left;
+}
+
+.upload-preview-img {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--gray-200);
 }
 
 /* Feature cards */
@@ -1272,6 +1313,17 @@ body {
   background: var(--purple);
 }
 
+.card-heatmap-placeholder {
+  border: 1px dashed var(--gray-300);
+  background: linear-gradient(145deg, rgba(240, 253, 250, 0.8), rgba(255, 255, 255, 0.8));
+}
+
+.heatmap-placeholder-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--gray-600);
+}
+
 /* Report */
 .report-section {
   margin-bottom: 1rem;
@@ -1483,6 +1535,7 @@ html[data-theme="dark"] body {
   background-clip: text;
 }
 .app.dark .home-subtitle { color: var(--text-secondary); }
+.app.dark .hero-disclaimer { color: var(--text-muted); }
 
 .app.dark .home-stat,
 .app.dark .home-card,
@@ -1506,6 +1559,7 @@ html[data-theme="dark"] body {
 .app.dark .upload-section h1,
 .app.dark .subtitle { color: var(--text-primary); }
 .app.dark .subtitle { color: var(--text-secondary); }
+.app.dark .upload-disclaimer { color: var(--text-muted); }
 .app.dark .dropzone {
   background: var(--purple-bg);
   border-color: var(--purple);
@@ -1518,6 +1572,12 @@ html[data-theme="dark"] body {
 .app.dark .dropzone-text { color: var(--text-primary); }
 .app.dark .dropzone-hint { color: var(--text-muted); }
 .app.dark .dropzone-filename { color: var(--purple-light); }
+.app.dark .upload-preview-card {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+.app.dark .upload-preview-card h3 { color: var(--text-primary); }
+.app.dark .upload-preview-img { border-color: var(--border); }
 .app.dark .feature-card {
   background: var(--bg-surface);
   border-color: var(--border);
@@ -1578,6 +1638,11 @@ html[data-theme="dark"] body {
 .app.dark .prob-item-highlight .prob-header { color: var(--text-primary); }
 .app.dark .prob-bar { background: var(--bg-elevated); }
 .app.dark .prob-fill { background: var(--purple); }
+.app.dark .card-heatmap-placeholder {
+  background: rgba(13, 148, 136, 0.1);
+  border-color: var(--purple);
+}
+.app.dark .heatmap-placeholder-text { color: var(--text-secondary); }
 .app.dark .qa-block { background: var(--bg-elevated); }
 .app.dark .qa-block.qa-yes { background: rgba(34, 197, 94, 0.2); }
 .app.dark .qa-block.qa-no { background: rgba(239, 68, 68, 0.2); }

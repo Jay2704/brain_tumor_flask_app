@@ -366,15 +366,17 @@ function App() {
         {view === 'home' && (
           <section className="home-section">
             <div className="home-hero">
-              <span className="home-badge">AI-Powered Radiology Support</span>
+              <span className="home-badge">AI-Powered MRI Classification</span>
               <h1 className="home-title">
-                <span className="home-title-gradient">Medical MRI</span>
-                <br />
-                Diagnosis AI
+                <span className="home-title-gradient">Brain Tumor</span>
+                <br />Detection AI
               </h1>
               <div className="home-subtitle-block">
                 <p className="home-subtitle">
-                  Upload brain MRI scans for instant, AI-powered preliminary analysis. Our AI classifies scans into four categories—supporting radiologists with fast, consistent screening.
+                  Upload an MRI scan and get an AI-based tumor classification with confidence scores and structured insights.
+                </p>
+                <p className="hero-disclaimer">
+                  This is an educational AI demo and not a medical diagnosis tool.
                 </p>
               </div>
               <button type="button" className="btn-cta" onClick={() => setView('upload')}>
@@ -428,9 +430,12 @@ function App() {
 
         {view === 'upload' && (
           <section className="upload-section">
-            <h1>Brain Tumor Detection Using AI</h1>
+            <h1>Brain Tumor Detection AI</h1>
             <p className="subtitle">
-              Upload your MRI scans for instant AI-powered clinical insights and preliminary analysis.
+              Upload an MRI image to run AI-based tumor classification and receive a confidence-driven result.
+            </p>
+            <p className="upload-disclaimer">
+              This is an educational AI demo and not a medical diagnosis tool.
             </p>
 
             <div
@@ -456,6 +461,13 @@ function App() {
                 <p className="dropzone-filename">Selected: {file.name}</p>
               )}
             </div>
+
+            {previewUrl && (
+              <div className="upload-preview-card">
+                <h3>Uploaded MRI Preview</h3>
+                <img src={previewUrl} alt="Uploaded MRI preview" className="upload-preview-img" />
+              </div>
+            )}
 
             <div className="feature-cards">
               <div className="feature-card">
@@ -616,6 +628,13 @@ function App() {
                 </div>
               </div>
             )}
+
+            <div className="card card-heatmap-placeholder">
+              <h3>🧠 Tumor Attention Heatmap</h3>
+              <p className="heatmap-placeholder-text">
+                Explainability visualization coming soon.
+              </p>
+            </div>
 
             {/* Report */}
             {result.report && (
