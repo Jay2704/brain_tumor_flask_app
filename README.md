@@ -148,6 +148,7 @@ Set a repository variable named `VITE_API_BASE_URL` in GitHub:
 - **Python version on Render:** Use Python `3.10.13` for TensorFlow compatibility.
 - **Preferred Render config:** Set environment variable `PYTHON_VERSION=3.10.13`.
 - **Free plan behavior:** Render free web services can sleep after inactivity, so the first request after idle time may be slow.
+- **Memory note:** Free-tier instances can still run out of memory during TensorFlow inference on some requests.
 - **Frontend API URL:** Set `VITE_API_BASE_URL` to your deployed Render backend URL so the frontend calls the correct API in production.
 
 ### Local Production-Style Run (Optional)

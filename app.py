@@ -1,6 +1,7 @@
 from flask import Flask, Response, jsonify, render_template, request, redirect, url_for
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+import gc
 import logging
 import os
 import uuid
@@ -40,6 +41,11 @@ try:
 except Exception as e:
     model = None
     logging.exception("Model load failed for %s: %s", model_path, e)
+else:
+    logging.info("Startup: TensorFlow model loaded from %s", model_path)
+
+logging.info("Startup: model_loaded=%s", model is not None)
+print(f"Startup check: model_loaded={model is not None} path={model_path}")
 
 CLASS_LABELS = ["glioma", "meningioma", "no_tumor", "pituitary"]
 
@@ -133,6 +139,9 @@ def upload_image():
             "index.html",
             error=f"Could not process image. Please ensure it is a valid PNG, JPG, or JPEG file. ({str(e)})",
         )
+    finally:
+        # Keep memory pressure low on constrained hosts after inference completes.
+        gc.collect()
 
 
 @app.route("/api/v1/analyze", methods=["POST"])
@@ -181,6 +190,9 @@ def api_v1_analyze():
             f"Analysis failed: {str(e)}",
             500,
         )
+    finally:
+        # Keep memory pressure low on constrained hosts after inference completes.
+        gc.collect()
 
 
 @app.route("/api/analyze", methods=["POST"])
