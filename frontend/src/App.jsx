@@ -9,11 +9,17 @@ import { jsPDF } from 'jspdf'
 import { Client } from '@gradio/client'
 
 const SPACE_ID = 'Decoder2704/brain-tumor-ai'
-const HF_LABEL_TO_KEY = {
-  'Glioma Tumor': 'glioma',
-  'Meningioma Tumor': 'meningioma',
-  'Pituitary Tumor': 'pituitary',
-  'No Tumor': 'no_tumor',
+const TUMOR_CLASS_NAMES = [
+  'Glioma Tumor',
+  'Meningioma Tumor',
+  'Pituitary Tumor',
+  'No Tumor',
+]
+const LEGACY_LABEL_MAP = {
+  glioma: 'Glioma Tumor',
+  meningioma: 'Meningioma Tumor',
+  pituitary: 'Pituitary Tumor',
+  no_tumor: 'No Tumor',
 }
 let gradioClientPromise
 
@@ -43,6 +49,67 @@ function extractPrediction(payload) {
   return { predictedClass: null, confidenceScore: null, probabilitiesRaw: null }
 }
 
+function normalizeClassLabel(label) {
+  if (!label) return ''
+  const text = String(label).trim()
+  const key = text.toLowerCase().replace(/\s+/g, '_')
+  return LEGACY_LABEL_MAP[key] || text
+}
+
+function parseProbabilities(probabilitiesRaw) {
+  if (!probabilitiesRaw) return null
+
+  // Shape: [0.1, 0.2, 0.6, 0.1]
+  if (Array.isArray(probabilitiesRaw) && probabilitiesRaw.every((v) => Number.isFinite(Number(v)))) {
+    const probs = {}
+    TUMOR_CLASS_NAMES.forEach((className, idx) => {
+      probs[className] = getNormalizedScore(probabilitiesRaw[idx] ?? 0)
+    })
+    return probs
+  }
+
+  // Shape: [{ label: 'Glioma Tumor', confidence: 0.12 }, ...]
+  if (
+    Array.isArray(probabilitiesRaw) &&
+    probabilitiesRaw.every((item) => item && typeof item === 'object' && 'label' in item && 'confidence' in item)
+  ) {
+    const probs = {}
+    probabilitiesRaw.forEach((item) => {
+      probs[normalizeClassLabel(item.label)] = getNormalizedScore(item.confidence)
+    })
+    TUMOR_CLASS_NAMES.forEach((className) => {
+      if (!(className in probs)) probs[className] = 0
+    })
+    return probs
+  }
+
+  // Shape from gr.Label: { label: '...', confidences: [{label, confidence}, ...] }
+  if (
+    typeof probabilitiesRaw === 'object' &&
+    probabilitiesRaw !== null &&
+    Array.isArray(probabilitiesRaw.confidences)
+  ) {
+    return parseProbabilities(probabilitiesRaw.confidences)
+  }
+
+  // Shape: { 'Glioma Tumor': 0.12, ... }
+  if (typeof probabilitiesRaw === 'object' && probabilitiesRaw !== null && !Array.isArray(probabilitiesRaw)) {
+    const probs = {}
+    Object.entries(probabilitiesRaw).forEach(([label, value]) => {
+      const className = normalizeClassLabel(label)
+      if (TUMOR_CLASS_NAMES.includes(className)) {
+        probs[className] = getNormalizedScore(value)
+      }
+    })
+    TUMOR_CLASS_NAMES.forEach((className) => {
+      if (!(className in probs)) probs[className] = 0
+    })
+    return Object.keys(probs).length ? probs : null
+  }
+
+  return null
+}
+
 function getNormalizedScore(value) {
   const score = Number(value)
   if (!Number.isFinite(score)) return 0
@@ -58,6 +125,7 @@ async function getGradioClient() {
 
 function formatLabel(label) {
   if (!label) return ''
+  if (String(label).includes(' ')) return String(label)
   return label
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -68,6 +136,10 @@ function getConfidenceBand(confidence) {
   if (confidence >= 0.8) return 'high'
   if (confidence >= 0.6) return 'medium'
   return 'low'
+}
+
+function formatConfidencePercent(confidence) {
+  return `${((confidence || 0) * 100).toFixed(2)}%`
 }
 
 function exportReportToPdf(result, previewUrl) {
@@ -118,7 +190,7 @@ function exportReportToPdf(result, previewUrl) {
   y += sectionGap + 5
 
   if (result.vision) {
-    addSection('Primary Detection', `${formatLabel(result.vision.label)} (Confidence: ${Math.round((result.vision.confidence || 0) * 100)}%)`)
+    addSection('Primary Detection', `${formatLabel(result.vision.label)} (Confidence: ${formatConfidencePercent(result.vision.confidence)})`)
   } else {
     addSection('Primary Detection', 'Inconclusive')
   }
@@ -304,14 +376,15 @@ function App() {
         throw new Error('Could not read predicted label from Hugging Face response.')
       }
 
-      const mappedLabel = String(predictedClass)
+      const mappedLabel = normalizeClassLabel(predictedClass)
+      let mappedProbabilities = parseProbabilities(probabilitiesRaw)
+      const normalizedConfidence = getNormalizedScore(confidenceScore)
 
-      let mappedProbabilities
-      if (probabilitiesRaw && typeof probabilitiesRaw === 'object' && !Array.isArray(probabilitiesRaw)) {
+      // Fallback for APIs that return only label + confidence.
+      if (!mappedProbabilities) {
         mappedProbabilities = {}
-        Object.entries(probabilitiesRaw).forEach(([label, value]) => {
-          const normalizedLabel = label in HF_LABEL_TO_KEY ? label : String(label)
-          mappedProbabilities[normalizedLabel] = getNormalizedScore(value)
+        TUMOR_CLASS_NAMES.forEach((className) => {
+          mappedProbabilities[className] = className === mappedLabel ? normalizedConfidence : 0
         })
       }
 
@@ -319,7 +392,7 @@ function App() {
         request_id: `hf-${Date.now()}`,
         vision: {
           label: mappedLabel,
-          confidence: getNormalizedScore(confidenceScore),
+          confidence: normalizedConfidence,
           probs: mappedProbabilities,
         },
         artifacts: {
@@ -635,7 +708,15 @@ function App() {
                 <>
                   <p className="prediction-label">{formatLabel(result.vision.label)}</p>
                   <p className="prediction-confidence">
-                    Confidence: <span className={`conf-badge conf-${getConfidenceBand(result.vision.confidence || 0)}`}>{Math.round((result.vision.confidence || 0) * 100)}%</span>
+                    Confidence: <span className={`conf-badge conf-${getConfidenceBand(result.vision.confidence || 0)}`}>{formatConfidencePercent(result.vision.confidence)}</span>
+                  </p>
+                  <p
+                    className="prediction-meta"
+                    style={{ fontSize: '0.8rem', opacity: 0.88, marginTop: '0.4rem', marginBottom: 0 }}
+                  >
+                    Model: CNN-VGG16
+                    <br />
+                    Input Size: 224x224 MRI
                   </p>
                 </>
               ) : (
@@ -694,7 +775,13 @@ function App() {
             <div className="card card-heatmap-placeholder">
               <h3>🧠 Tumor Attention Heatmap</h3>
               <p className="heatmap-placeholder-text">
-                Explainability visualization coming soon.
+                Explainable AI
+                <br />
+                <br />
+                Heatmap visualization will highlight tumor-relevant regions detected by the CNN model.
+                <br />
+                <br />
+                Grad-CAM explainability will be integrated to visualize which MRI regions contributed most to the prediction.
               </p>
             </div>
 
