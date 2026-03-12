@@ -6,8 +6,29 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
+import { Client } from '@gradio/client'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const SPACE_ID = 'Decoder2704/brain-tumor-ai'
+const HF_LABEL_TO_KEY = {
+  'Glioma Tumor': 'glioma',
+  'Meningioma Tumor': 'meningioma',
+  'Pituitary Tumor': 'pituitary',
+  'No Tumor': 'no_tumor',
+}
+let gradioClientPromise
+
+function getNormalizedScore(value) {
+  const score = Number(value)
+  if (!Number.isFinite(score)) return 0
+  return score > 1 ? score / 100 : score
+}
+
+async function getGradioClient() {
+  if (!gradioClientPromise) {
+    gradioClientPromise = Client.connect(SPACE_ID)
+  }
+  return gradioClientPromise
+}
 
 function formatLabel(label) {
   if (!label) return ''
@@ -235,57 +256,66 @@ function App() {
     setLoadingStep(2)
 
     try {
-      const formData = new FormData()
-      formData.append('image', file)
-      const controller = new AbortController()
-      timeoutId = setTimeout(() => controller.abort(), 60000)
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), 60000)
+      })
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/analyze`,
-        {
-          method: 'POST',
-          body: formData,
-          signal: controller.signal,
-        }
-      )
+      const client = await getGradioClient()
+      const predictionPromise = client.predict('/predict', {
+        image: file,
+      })
 
-      const text = await response.text()
+      const response = await Promise.race([predictionPromise, timeoutPromise])
       setLoadingStep(3)
 
-      let data
-      try {
-        data = text && text.trim() ? JSON.parse(text) : {}
-      } catch {
-        const hint = !text || !text.trim()
-          ? 'Server returned empty response. Ensure the Flask backend is running on port 5001 and the model file exists.'
-          : 'Server returned invalid response. Check that the backend is running and the model is loaded.'
-        throw new Error(hint)
+      const payload = response?.data ?? response
+      if (!Array.isArray(payload) || payload.length < 3) {
+        throw new Error('Unexpected response from Hugging Face prediction service.')
       }
 
-      if (!response.ok) {
-        const err = data?.error
-        const msg =
-          (typeof err === 'string' ? err : err?.message) ||
-          data?.message ||
-          `Request failed (${response.status})`
-        throw new Error(msg)
+      const predictedClass = payload[1]
+      const confidenceScore = payload[2]
+      const probabilitiesRaw = payload[3]
+
+      const mappedLabel =
+        HF_LABEL_TO_KEY[predictedClass] ||
+        String(predictedClass || 'inconclusive').toLowerCase().replace(/\s+/g, '_')
+
+      let mappedProbabilities
+      if (probabilitiesRaw && typeof probabilitiesRaw === 'object' && !Array.isArray(probabilitiesRaw)) {
+        mappedProbabilities = {}
+        Object.entries(probabilitiesRaw).forEach(([label, value]) => {
+          const key = HF_LABEL_TO_KEY[label] || label.toLowerCase().replace(/\s+/g, '_')
+          mappedProbabilities[key] = getNormalizedScore(value)
+        })
       }
 
-      setResult(data)
+      const mappedResult = {
+        request_id: `hf-${Date.now()}`,
+        vision: {
+          label: mappedLabel,
+          confidence: getNormalizedScore(confidenceScore),
+          probs: mappedProbabilities,
+        },
+        artifacts: {
+          uploaded_image_url: '',
+        },
+      }
+
+      setResult(mappedResult)
       await new Promise((r) => setTimeout(r, 400))
       setView('results')
     } catch (err) {
-      if (err?.name === 'AbortError') {
+      if (err?.message === 'REQUEST_TIMEOUT') {
         setError('Request timed out after 60 seconds. Please try again.')
         setView('upload')
         return
       }
       const msg = err.message || 'We could not analyze this scan. Please try again.'
-      const isConnectionError = /failed to fetch|networkerror|ECONNREFUSED|connection refused/i.test(msg) ||
-        (msg.includes('Request failed') && (msg.includes('500') || msg.includes('502') || msg.includes('503')))
+      const isConnectionError = /failed to fetch|networkerror|ecconnrefused|connection refused|hugging face|space|unavailable/i.test(msg)
       setError(
         isConnectionError
-          ? 'Backend unavailable. Start the Flask server: run `python app.py` from the project root (port 5001).'
+          ? 'Prediction service is temporarily unavailable. Please try again shortly.'
           : msg
       )
       setView('upload')
