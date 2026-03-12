@@ -17,6 +17,32 @@ const HF_LABEL_TO_KEY = {
 }
 let gradioClientPromise
 
+function extractPrediction(payload) {
+  if (!Array.isArray(payload)) {
+    return { predictedClass: null, confidenceScore: null, probabilitiesRaw: null }
+  }
+
+  // Most common Space response shape: [predicted_label, confidence]
+  if (typeof payload[0] === 'string') {
+    return {
+      predictedClass: payload[0],
+      confidenceScore: payload[1],
+      probabilitiesRaw: payload[2],
+    }
+  }
+
+  // Alternate shape when uploaded image is returned first: [image, predicted_label, confidence, probs]
+  if (typeof payload[1] === 'string') {
+    return {
+      predictedClass: payload[1],
+      confidenceScore: payload[2],
+      probabilitiesRaw: payload[3],
+    }
+  }
+
+  return { predictedClass: null, confidenceScore: null, probabilitiesRaw: null }
+}
+
 function getNormalizedScore(value) {
   const score = Number(value)
   if (!Number.isFinite(score)) return 0
@@ -269,24 +295,23 @@ function App() {
       setLoadingStep(3)
 
       const payload = response?.data ?? response
-      if (!Array.isArray(payload) || payload.length < 3) {
+      if (!Array.isArray(payload) || payload.length < 2) {
         throw new Error('Unexpected response from Hugging Face prediction service.')
       }
 
-      const predictedClass = payload[1]
-      const confidenceScore = payload[2]
-      const probabilitiesRaw = payload[3]
+      const { predictedClass, confidenceScore, probabilitiesRaw } = extractPrediction(payload)
+      if (!predictedClass) {
+        throw new Error('Could not read predicted label from Hugging Face response.')
+      }
 
-      const mappedLabel =
-        HF_LABEL_TO_KEY[predictedClass] ||
-        String(predictedClass || 'inconclusive').toLowerCase().replace(/\s+/g, '_')
+      const mappedLabel = String(predictedClass)
 
       let mappedProbabilities
       if (probabilitiesRaw && typeof probabilitiesRaw === 'object' && !Array.isArray(probabilitiesRaw)) {
         mappedProbabilities = {}
         Object.entries(probabilitiesRaw).forEach(([label, value]) => {
-          const key = HF_LABEL_TO_KEY[label] || label.toLowerCase().replace(/\s+/g, '_')
-          mappedProbabilities[key] = getNormalizedScore(value)
+          const normalizedLabel = label in HF_LABEL_TO_KEY ? label : String(label)
+          mappedProbabilities[normalizedLabel] = getNormalizedScore(value)
         })
       }
 
